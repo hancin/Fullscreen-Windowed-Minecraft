@@ -1,37 +1,29 @@
 package com.hancinworld.fw;
 
+import com.hancinworld.fw.handler.ConfigurationHandler;
 import com.hancinworld.fw.proxy.IProxy;
+import com.hancinworld.fw.reference.Reference;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = "fw", name="Fullscreen Windowed",version="1.7.10-1.0.0")
+@Mod(modid = Reference.MOD_ID, name=Reference.MOD_NAME,version=Reference.VERSION,guiFactory = Reference.GUI_FACTORY_CLASS)
 public class FullscreenWindowed {
 
-    @SidedProxy(clientSide = "com.hancinworld.fw.proxy.ClientProxy", serverSide = "com.hancinworld.fw.proxy.ServerProxy")
+    @SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS)
     public static IProxy proxy;
 
-    @Mod.Instance("fw")
+    @Mod.Instance(Reference.MOD_ID)
     public static FullscreenWindowed instance;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
         //Items and blocks
+        ConfigurationHandler.init(event.getSuggestedConfigurationFile());
+        FMLCommonHandler.instance().bus().register(new ConfigurationHandler());
         proxy.toggleFullScreen(true);
     }
 
-    @Mod.EventHandler
-    public void init(FMLInitializationEvent event)
-    {
-        //GUI and recipes and stuff
-    }
-
-    @Mod.EventHandler
-    public void postInit(FMLPostInitializationEvent event)
-    {
-        //After-mod initialization stuff
-    }
 }
