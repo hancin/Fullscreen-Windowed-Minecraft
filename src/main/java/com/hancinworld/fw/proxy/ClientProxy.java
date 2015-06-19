@@ -59,9 +59,6 @@ public class ClientProxy extends CommonProxy {
         } catch (LWJGLException e)
         {
             e.printStackTrace();
-        } catch (IllegalStateException e)
-        {
-            LogHelper.error(e);
-        }
+        } catch (IllegalStateException ignored) {}
     }
 }
