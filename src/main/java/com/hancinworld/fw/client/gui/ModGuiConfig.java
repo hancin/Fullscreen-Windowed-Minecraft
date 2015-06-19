@@ -2,7 +2,7 @@ package com.hancinworld.fw.client.gui;
 
 import com.hancinworld.fw.handler.ConfigurationHandler;
 import com.hancinworld.fw.reference.Reference;
-import cpw.mods.fml.client.config.GuiConfig;
+import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;

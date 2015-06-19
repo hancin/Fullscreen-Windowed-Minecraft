@@ -1,7 +1,7 @@
 package com.hancinworld.fw.proxy;
 
 import com.hancinworld.fw.utility.LogHelper;
-import cpw.mods.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
@@ -27,32 +27,41 @@ public class ClientProxy extends CommonProxy {
         }
 
         System.setProperty("org.lwjgl.opengl.Window.undecorated", state?"true":"false");
-        try {
+        try
+        {
             Display.setResizable(!state);
             Display.setFullscreen(false);
 
-            if(state){
+            if (state)
+            {
                 int w = Display.getDesktopDisplayMode().getWidth();
                 int h = Display.getDesktopDisplayMode().getHeight();
-                Display.setDisplayMode(new DisplayMode( w ,  h));
-                try{
+                Display.setDisplayMode(new DisplayMode(w, h));
+                try
+                {
                     Minecraft inst = Minecraft.getMinecraft();
                     Method resizeMethod = ReflectionHelper.findMethod(Minecraft.class, inst, new String[]{"func_71370_a", "resize"});
-                    if(resizeMethod != null)
+                    if (resizeMethod != null)
                     {
                         Display.update();
                         resizeMethod.invoke(inst, w, h);
                     }
 
-                }catch (Exception e){
+                } catch (Exception e)
+                {
                     LogHelper.warn("Resize method not found or problem found while calling it. Are you using the correct version of the mod for this version of Minecraft?" + e.toString());
                 }
-            }else{
-                Display.setDisplayMode(new DisplayMode( Math.max(_lastRegisteredWidth, 800),  Math.max(_lastRegisteredHeight, 473)));
+            } else
+            {
+                Display.setDisplayMode(new DisplayMode(Math.max(_lastRegisteredWidth, 800), Math.max(_lastRegisteredHeight, 473)));
             }
 
-        } catch (LWJGLException e) {
+        } catch (LWJGLException e)
+        {
             e.printStackTrace();
+        } catch (IllegalStateException e)
+        {
+            LogHelper.error(e);
         }
     }
 }
