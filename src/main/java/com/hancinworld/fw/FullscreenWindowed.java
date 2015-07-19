@@ -7,10 +7,9 @@ import com.hancinworld.fw.reference.Reference;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.*;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.opengl.Display;
 
 @Mod(modid = Reference.MOD_ID, name=Reference.MOD_NAME,version=Reference.VERSION,guiFactory = Reference.GUI_FACTORY_CLASS)
 public class FullscreenWindowed {
@@ -20,6 +19,8 @@ public class FullscreenWindowed {
 
     @Mod.Instance(Reference.MOD_ID)
     public static FullscreenWindowed instance;
+
+    private boolean runOnce = true;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
@@ -37,9 +38,11 @@ public class FullscreenWindowed {
 
     }
 
-    @Mod.EventHandler
-    public void loadComplete(FMLLoadCompleteEvent event)
-    {
-        proxy.toggleFullScreen(ConfigurationHandler.fullscreenWindowedStartup);
-    }
+    /*@Mod.EventHandler
+    public void construction(FMLConstructionEvent event) {
+        if(runOnce){
+            runOnce = false;
+            proxy.toggleFullScreen(ConfigurationHandler.fullscreenWindowedStartup);
+        }
+    }*/
 }
