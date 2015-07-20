@@ -10,12 +10,26 @@
 :apiClasses UP-TO-DATE
 :sourceMainJava
 :compileJavawarning: [options] bootstrap class path not set in conjunction with -source 1.6
+Note: C:\Users\David\Documents\GitHub\Fullscreen-Windowed-Minecraft\build\sources\java\com\hancinworld\fw\client\gui\ModGuiConfig.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
 1 warning
 
 :processResources UP-TO-DATE
 :classes
 :jar
+:compileTestJava UP-TO-DATE
+:processTestResources UP-TO-DATE
+:testClasses UP-TO-DATE
+:test UP-TO-DATE
+:extractMcpData UP-TO-DATE
+:getVersionJson
+:extractUserDev UP-TO-DATE
+:genSrgs SKIPPED
+:reobf
+:assemble
+:check UP-TO-DATE
+:build
 
 BUILD SUCCESSFUL
 
-Total time: 6.205 secs
+Total time: 14.993 secs
