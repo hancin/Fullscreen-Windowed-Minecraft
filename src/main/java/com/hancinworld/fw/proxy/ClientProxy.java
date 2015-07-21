@@ -32,15 +32,17 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
+import java.awt.*;
 import java.lang.reflect.Method;
 
 public class ClientProxy extends CommonProxy {
 
-    private int _lastRegisteredWidth = 0;
-    private int _lastRegisteredHeight = 0;
+    private Rectangle _savedWindowedBounds;
     public static boolean currentState;
     public static KeyBinding fullscreenKeyBinding;
 
+    /** This keybind replaces the default MC fullscreen keybind in their logic handler. Without it, the game crashes.
+     *  If this is set to any valid key, problems may occur. */
     public static KeyBinding ignoreKeyBinding = new KeyBinding("key.fullscreenwindowed.unused", Keyboard.KEY_NONE, "key.categories.misc");
 
     @Override
@@ -56,51 +58,111 @@ public class ClientProxy extends CommonProxy {
         }
     }
 
-    @Override
-    public void toggleFullScreen(boolean state) {
+    private Rectangle findCurrentScreenDimensionsAndPosition(int x, int y)
+    {
+         //clamp value to the positive realm
+         if(x < 0)
+             x = 0;
+         if(y < 0)
+             y = 0;
 
-        if(state)
+        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice[] screens = env.getScreenDevices();
+
+        //TODO: Actually test with multiple display adapters to see if issue occurs
+        for(GraphicsDevice dev : screens)
         {
-            _lastRegisteredWidth = Display.getWidth();
-            _lastRegisteredHeight = Display.getHeight();
+            GraphicsConfiguration displayMode = dev.getDefaultConfiguration();
+            Rectangle bounds = displayMode.getBounds();
+
+            if(bounds.contains(x, y))
+                return bounds;
         }
 
-        System.setProperty("org.lwjgl.opengl.Window.undecorated", state?"true":"false");
+        //if Java isn't able to find a matching screen then use the old LWJGL calcs.
+        return new Rectangle(0, 0, Display.getDesktopDisplayMode().getWidth(), Display.getDesktopDisplayMode().getHeight());
+}
+
+    /** Calls the Minecraft resize() method so it updates its framebuffer. */
+    private void callMinecraftResizeMethod(int w, int h)
+    {
+        try{
+            Class[] args = new Class[2];
+            args[0] = int.class;
+            args[1] = int.class;
+            Minecraft inst = Minecraft.getMinecraft();
+            Method resizeMethod = ReflectionHelper.findMethod(Minecraft.class, inst, new String[]{"func_71370_a", "resize"}, args);
+            if(resizeMethod != null)
+            {
+                Display.update();
+                resizeMethod.invoke(inst, w, h);
+            }
+
+        }catch (Exception e){
+            LogHelper.warn("Resize method not found or problem found while calling it. Are you using the correct version of the mod for this version of Minecraft?" + e.toString());
+        }
+    }
+
+    private boolean isDesktopDisplayMode(Rectangle bounds)
+    {
+        if(bounds.getX() == 0 && bounds.getY() == 0)
+        {
+            DisplayMode displayMode = Display.getDesktopDisplayMode();
+
+            return displayMode.getWidth() == bounds.getWidth() && displayMode.getHeight() == bounds.getHeight();
+        }
+
+        return false;
+    }
+    @Override
+    public void toggleFullScreen(boolean goFullScreen) {
+
+        if(Display.isFullscreen()) {
+            currentState = true;
+            LogHelper.warn("Display is actual fullscreen! Is Minecraft starting with the option set?");
+        }
+
+        if(currentState == goFullScreen)
+            return;
+
+        //Changing this property and causing a Display update will cause LWJGL to add/remove decorations (borderless).
+        System.setProperty("org.lwjgl.opengl.Window.undecorated", goFullScreen?"true":"false");
+
+        //Save our current display parameters
+        Rectangle currentCoords = new Rectangle(Display.getX(), Display.getY(), Display.getWidth(), Display.getHeight());
+        if(goFullScreen)
+            _savedWindowedBounds = currentCoords;
+
+
+        //find which monitor we should be using based on the center of the MC window
+        Point centerCoordinates = new Point((int)(currentCoords.getMinX() + currentCoords.getWidth() / 2), (int)(currentCoords.getMinY() + currentCoords.getHeight() / 2));
+        Rectangle screenBounds = findCurrentScreenDimensionsAndPosition((int)centerCoordinates.getX(), (int)centerCoordinates.getY());
+
+        //This is the new bounds we have to apply.
+        Rectangle newBounds = goFullScreen ? screenBounds : _savedWindowedBounds;
+        if(newBounds == null)
+            newBounds = screenBounds;
+
+
+
         try {
-            Display.setResizable(!state);
+            Display.setDisplayMode(new DisplayMode((int) newBounds.getWidth(), (int) newBounds.getHeight()));
+            Display.setResizable(!goFullScreen);
             Display.setFullscreen(false);
-            int w,h;
-            if(state){
-                w = Display.getDesktopDisplayMode().getWidth();
-                h = Display.getDesktopDisplayMode().getHeight();
-                Display.setDisplayMode(new DisplayMode( w ,  h));
+            //Vsync has no effect on borderless windows.
+            Display.setVSyncEnabled(false);
 
-            }else{
-                w =  Math.max(_lastRegisteredWidth, 800);
-                h = Math.max(_lastRegisteredHeight, 473);
-                Display.setDisplayMode(new DisplayMode( w ,  h));
-            }
+            Display.update();
 
-            try{
-                Class[] args = new Class[2];
-                args[0] = int.class;
-                args[1] = int.class;
-                Minecraft inst = Minecraft.getMinecraft();
-                Method resizeMethod = ReflectionHelper.findMethod(Minecraft.class, inst, new String[]{"func_71370_a", "resize"}, args);
-                if(resizeMethod != null)
-                {
-                    Display.update();
-                    resizeMethod.invoke(inst, w, h);
-                }
+            Display.setLocation((int) newBounds.getMinX(), (int)newBounds.getMinY());
 
-            }catch (Exception e){
-                LogHelper.warn("Resize method not found or problem found while calling it. Are you using the correct version of the mod for this version of Minecraft?" + e.toString());
-            }
+
+            callMinecraftResizeMethod((int)newBounds.getWidth(), (int)newBounds.getHeight());
 
         } catch (LWJGLException e) {
             e.printStackTrace();
         }
 
-        currentState = state;
+        currentState = goFullScreen;
     }
 }

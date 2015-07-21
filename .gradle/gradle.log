@@ -14,7 +14,7 @@ Note: C:\Users\David\Documents\GitHub\Fullscreen-Windowed-Minecraft\build\source
 Note: Recompile with -Xlint:unchecked for details.
 1 warning
 
-:processResources UP-TO-DATE
+:processResources
 :classes
 :jar
 :compileTestJava UP-TO-DATE
@@ -32,4 +32,4 @@ Note: Recompile with -Xlint:unchecked for details.
 
 BUILD SUCCESSFUL
 
-Total time: 14.993 secs
+Total time: 12.991 secs

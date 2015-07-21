@@ -22,8 +22,7 @@
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.hancinworld.fw;
 
-import com.hancinworld.fw.handler.ConfigurationHandler;
-import com.hancinworld.fw.handler.KeyInputEventHandler;
+import com.hancinworld.fw.handler.*;
 import com.hancinworld.fw.proxy.IProxy;
 import com.hancinworld.fw.reference.Reference;
 import cpw.mods.fml.common.FMLCommonHandler;
