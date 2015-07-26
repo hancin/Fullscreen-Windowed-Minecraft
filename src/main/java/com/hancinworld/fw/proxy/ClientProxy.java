@@ -45,6 +45,13 @@ public class ClientProxy extends CommonProxy {
      *  If this is set to any valid key, problems may occur. */
     public static KeyBinding ignoreKeyBinding = new KeyBinding("key.fullscreenwindowed.unused", Keyboard.KEY_NONE, "key.categories.misc");
 
+
+    public ClientProxy()
+    {
+        Minecraft mc = Minecraft.getMinecraft();
+        mc.gameSettings.fullScreen = false;
+    }
+
     @Override
     public void registerKeyBindings()
     {
