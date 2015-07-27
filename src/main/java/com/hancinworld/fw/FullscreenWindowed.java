@@ -39,14 +39,13 @@ public class FullscreenWindowed {
     @Mod.Instance(Reference.MOD_ID)
     public static FullscreenWindowed instance;
 
-    private boolean runOnce = true;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
         //Items and blocks
-        ConfigurationHandler.init(event.getSuggestedConfigurationFile());
-        FMLCommonHandler.instance().bus().register(new ConfigurationHandler());
+        ConfigurationHandler.instance().init(event.getSuggestedConfigurationFile());
+        FMLCommonHandler.instance().bus().register(ConfigurationHandler.instance());
         FMLCommonHandler.instance().bus().register(new KeyInputEventHandler());
 
     }
@@ -57,11 +56,9 @@ public class FullscreenWindowed {
 
     }
 
-    /*@Mod.EventHandler
-    public void construction(FMLConstructionEvent event) {
-        if(runOnce){
-            runOnce = false;
-            proxy.toggleFullScreen(ConfigurationHandler.fullscreenWindowedStartup);
-        }
-    }*/
+    @Mod.EventHandler
+    public void postInit(FMLPostInitializationEvent event) {
+        proxy.performStartupChecks();
+    }
+
 }

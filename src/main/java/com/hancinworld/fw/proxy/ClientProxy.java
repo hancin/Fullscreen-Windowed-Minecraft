@@ -23,7 +23,10 @@
 package com.hancinworld.fw.proxy;
 
 import com.hancinworld.fw.handler.ConfigurationHandler;
+import com.hancinworld.fw.reference.Reference;
 import com.hancinworld.fw.utility.LogHelper;
+import cpw.mods.fml.client.SplashProgress;
+import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
@@ -31,6 +34,7 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import org.w3c.dom.css.Rect;
 
 import java.awt.*;
 import java.lang.reflect.Method;
@@ -57,7 +61,7 @@ public class ClientProxy extends CommonProxy {
     {
 
         /* FIXME: Overrides the minecraft hotkey for fullscreen, as there are no hooks */
-        if(ConfigurationHandler.overrideF11Behavior)
+        if(ConfigurationHandler.instance().getOverrideF11Behavior())
         {
             Minecraft mc = Minecraft.getMinecraft();
             fullscreenKeyBinding = mc.gameSettings.field_152395_am;
@@ -89,6 +93,20 @@ public class ClientProxy extends CommonProxy {
         //if Java isn't able to find a matching screen then use the old LWJGL calcs.
         return new Rectangle(0, 0, Display.getDesktopDisplayMode().getWidth(), Display.getDesktopDisplayMode().getHeight());
 }
+    private Rectangle findScreenDimensionsByID(int monitorID)
+    {
+        if(monitorID < 1)
+            return null;
+
+        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice[] screens = env.getScreenDevices();
+
+        if(screens == null || screens.length == 0 || screens.length < monitorID){
+            return null;
+        }
+
+        return screens[monitorID - 1].getDefaultConfiguration().getBounds();
+    }
 
     /** Calls the Minecraft resize() method so it updates its framebuffer. */
     private void callMinecraftResizeMethod(int w, int h)
@@ -110,40 +128,45 @@ public class ClientProxy extends CommonProxy {
         }
     }
 
-    private boolean isDesktopDisplayMode(Rectangle bounds)
-    {
-        if(bounds.getX() == 0 && bounds.getY() == 0)
-        {
-            DisplayMode displayMode = Display.getDesktopDisplayMode();
 
-            return displayMode.getWidth() == bounds.getWidth() && displayMode.getHeight() == bounds.getHeight();
-        }
-
-        return false;
-    }
     @Override
-    public void toggleFullScreen(boolean goFullScreen) {
+    public void toggleFullScreen(boolean goFullScreen, int desiredMonitor) {
 
         if(Display.isFullscreen()) {
             currentState = true;
             LogHelper.warn("Display is actual fullscreen! Is Minecraft starting with the option set?");
         }
 
-        if(currentState == goFullScreen)
+        if(currentState == goFullScreen && !Display.isFullscreen())
             return;
 
         //Changing this property and causing a Display update will cause LWJGL to add/remove decorations (borderless).
         System.setProperty("org.lwjgl.opengl.Window.undecorated", goFullScreen?"true":"false");
 
         //Save our current display parameters
-        Rectangle currentCoords = new Rectangle(Display.getX(), Display.getY(), Display.getWidth(), Display.getHeight());
+        Rectangle currentCoordinates = new Rectangle(Display.getX(), Display.getY(), Display.getWidth(), Display.getHeight());
         if(goFullScreen)
-            _savedWindowedBounds = currentCoords;
+            _savedWindowedBounds = currentCoordinates;
 
 
-        //find which monitor we should be using based on the center of the MC window
-        Point centerCoordinates = new Point((int)(currentCoords.getMinX() + currentCoords.getWidth() / 2), (int)(currentCoords.getMinY() + currentCoords.getHeight() / 2));
-        Rectangle screenBounds = findCurrentScreenDimensionsAndPosition((int)centerCoordinates.getX(), (int)centerCoordinates.getY());
+        Rectangle screenBounds;
+        Point centerCoordinates = new Point((int) (currentCoordinates.getMinX() + currentCoordinates.getWidth() / 2), (int) (currentCoordinates.getMinY() + currentCoordinates.getHeight() / 2));
+
+
+        if(desiredMonitor < 0 || desiredMonitor == Reference.AUTOMATIC_MONITOR_SELECTION) {
+            //find which monitor we should be using based on the center of the MC window
+            screenBounds = findCurrentScreenDimensionsAndPosition((int) centerCoordinates.getX(), (int) centerCoordinates.getY());
+            if(goFullScreen)
+                ConfigurationHandler.instance().setFullscreenMonitor(Reference.AUTOMATIC_MONITOR_SELECTION);
+
+        }else{
+            screenBounds = findScreenDimensionsByID(desiredMonitor);
+
+            if(screenBounds == null){
+                screenBounds = findCurrentScreenDimensionsAndPosition((int) centerCoordinates.getX(), (int) centerCoordinates.getY());
+                ConfigurationHandler.instance().setFullscreenMonitor(Reference.AUTOMATIC_MONITOR_SELECTION);
+            }
+        }
 
         //This is the new bounds we have to apply.
         Rectangle newBounds = goFullScreen ? screenBounds : _savedWindowedBounds;
@@ -156,8 +179,6 @@ public class ClientProxy extends CommonProxy {
             Display.setDisplayMode(new DisplayMode((int) newBounds.getWidth(), (int) newBounds.getHeight()));
             Display.setResizable(!goFullScreen);
             Display.setFullscreen(false);
-            //Vsync has no effect on borderless windows.
-            Display.setVSyncEnabled(false);
 
             Display.update();
 
@@ -171,5 +192,15 @@ public class ClientProxy extends CommonProxy {
         }
 
         currentState = goFullScreen;
+    }
+
+    @Override
+    @SuppressWarnings("deprecated")
+    public void performStartupChecks()
+    {
+        //FIXME: Living dangerously here... Is there a better way of doing this?
+        SplashProgress.pause();
+        toggleFullScreen(ConfigurationHandler.instance().getFullscreenWindowedStartup(), ConfigurationHandler.instance().getFullscreenMonitor());
+        SplashProgress.resume();
     }
 }

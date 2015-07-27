@@ -22,31 +22,55 @@
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.hancinworld.fw.handler;
 
+import com.hancinworld.fw.FullscreenWindowed;
 import com.hancinworld.fw.reference.Reference;
 import cpw.mods.fml.client.event.ConfigChangedEvent;
-import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraft.util.StatCollector;
+import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
-import org.apache.logging.log4j.Level;
+import net.minecraftforge.common.config.Property;
 
 import java.io.File;
 
-/**
- * Created by David on 2015-02-02.
- */
 public class ConfigurationHandler {
 
-    public static Configuration configuration;
+    private Configuration _configuration;
+    private static ConfigurationHandler _instance;
 
-    public static boolean overrideF11Behavior = true;
-    public static boolean fullscreenWindowedStartup = true;
-    public static int fullScreenMonitor = -1;
+    private Property _overrideF11Behavior = null;
+    private Property _fullscreenWindowedStartup = null;
+    private Property _fullscreenMonitor = null;
+    private boolean _commitImmediately = true;
 
-    public static void init(File configFile)
+    private boolean _isInitializing = false;
+
+
+    private ConfigurationHandler()
     {
-        if(configuration == null) {
-            configuration = new Configuration(configFile);
-            loadConfiguration();
+    }
+
+    public static ConfigurationHandler instance()
+    {
+        if(_instance == null)
+            _instance = new ConfigurationHandler();
+
+        return _instance;
+    }
+
+    public ConfigCategory getConfigurationCategory()
+    {
+        return _configuration.getCategory(Configuration.CATEGORY_GENERAL);
+    }
+
+
+    public void init(File suggestedConfigurationFile)
+    {
+        if(_configuration == null) {
+            _configuration = new Configuration(suggestedConfigurationFile);
+            _isInitializing = true;
+            load();
+            _isInitializing = false;
         }
     }
 
@@ -54,27 +78,80 @@ public class ConfigurationHandler {
     public void onConfigurationChangedEvent(ConfigChangedEvent.OnConfigChangedEvent event)
     {
         if(event.modID.equalsIgnoreCase(Reference.MOD_ID)) {
-            loadConfiguration();
+            load();
         }
     }
 
-    private static void loadConfiguration()
+    public boolean getOverrideF11Behavior()
     {
-        boolean overrideF11Behavior = true;
-        boolean fullscreenWindowedStartup = true;
-        int fullscreenMonitor = -1;
+        if(_overrideF11Behavior == null)
+            return true;
 
-        overrideF11Behavior = configuration.getBoolean("overrideF11Behavior", Configuration.CATEGORY_GENERAL, true, "Make this mod override the default fullscreen F11 behavior to use fullscreen windowed mode.");
-        fullscreenWindowedStartup = configuration.getBoolean("fullscreenWindowedStartup", Configuration.CATEGORY_GENERAL, true, "Forces Minecraft to start in fullscreen windowed mode");
-        fullscreenMonitor = configuration.getInt("fullscreenMonitor", Configuration.CATEGORY_GENERAL, -1,-1, 5, "Indicates which monitor to use for fullscreen windowed mode. Use -1 for the default behavior of maximizing on the active monitor.");
+        return _overrideF11Behavior.getBoolean(true);
+    }
+    public void setOverrideF11Behavior(boolean value)
+    {
+        _overrideF11Behavior.set(value);
 
-        if (configuration.hasChanged()) {
-            configuration.save();
+        if(_commitImmediately && _configuration.hasChanged())
+            _configuration.save();
+    }
+
+    public boolean getFullscreenWindowedStartup()
+    {
+        if(_fullscreenWindowedStartup == null)
+            return false;
+
+        return _fullscreenWindowedStartup.getBoolean(true);
+    }
+    public void setFullscreenWindowedStartup(boolean value)
+    {
+        _fullscreenWindowedStartup.set(value);
+
+        if(_commitImmediately && _configuration.hasChanged())
+            _configuration.save();
+    }
+
+    public int getFullscreenMonitor()
+    {
+        if(_fullscreenMonitor == null)
+            return Reference.AUTOMATIC_MONITOR_SELECTION;
+
+        return _fullscreenMonitor.getInt(Reference.AUTOMATIC_MONITOR_SELECTION);
+    }
+
+    public void setFullscreenMonitor(int value)
+    {
+        _fullscreenMonitor.set(value);
+
+        if(_commitImmediately && _configuration.hasChanged())
+            _configuration.save();
+    }
+
+    public boolean isCommitImmediately()
+    {
+        return _commitImmediately;
+    }
+    public void setCommitImmediately(boolean value)
+    {
+        _commitImmediately = value;
+    }
+
+
+    private void load()
+    {
+        _overrideF11Behavior = _configuration.get(Configuration.CATEGORY_GENERAL, "overrideF11Behavior", true, StatCollector.translateToLocal("comment.fullscreenwindowed.overridef11behavior"));
+        _fullscreenWindowedStartup = _configuration.get(Configuration.CATEGORY_GENERAL, "fullscreenWindowedStartup", false, StatCollector.translateToLocal("comment.fullscreenwindowed.fullscreenwindowedstartup"));
+        _fullscreenMonitor = _configuration.get(Configuration.CATEGORY_GENERAL, "fullscreenMonitor", 0, StatCollector.translateToLocal("comment.fullscreenwindowed.fullscreenmonitor"));
+
+        if (_configuration.hasChanged()) {
+            _configuration.save();
         }
+    }
 
 
-        ConfigurationHandler.overrideF11Behavior = overrideF11Behavior;
-        ConfigurationHandler.fullScreenMonitor = fullscreenMonitor;
-        ConfigurationHandler.fullscreenWindowedStartup = fullscreenWindowedStartup;
+    @Override
+    public String toString(){
+        return _configuration.toString();
     }
 }

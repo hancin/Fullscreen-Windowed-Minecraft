@@ -1,2 +1,5 @@
 key.fullscreenwindowed.unused=Unused Key - Leave blank
 key.fullscreenwindowed.category=Fullscreen Windowed Mod
+comment.fullscreenwindowed.overridef11behavior=Make this mod override the default fullscreen F11 behavior to use fullscreen windowed mode.
+comment.fullscreenwindowed.fullscreenwindowedstartup=Forces Minecraft to start in fullscreen windowed mode
+comment.fullscreenwindowed.fullscreenmonitor=Indicates which monitor (1-based) to use for fullscreen windowed mode. Use 0 for the default behavior of maximizing on the active monitor.

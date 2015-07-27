@@ -25,6 +25,7 @@ package com.hancinworld.fw.proxy;
 
 public interface IProxy {
 
-    public void toggleFullScreen(boolean state);
+    public void toggleFullScreen(boolean state, int desiredMonitor);
+    public void performStartupChecks();
     public void registerKeyBindings();
 }
