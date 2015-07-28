@@ -25,6 +25,7 @@ package com.hancinworld.fw.handler;
 import com.hancinworld.fw.FullscreenWindowed;
 import com.hancinworld.fw.proxy.ClientProxy;
 import com.hancinworld.fw.reference.Reference;
+import com.hancinworld.fw.utility.LogHelper;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import org.lwjgl.input.Keyboard;
@@ -35,6 +36,8 @@ import org.lwjgl.input.Keyboard;
 public class DrawScreenEventHandler {
 
     private boolean _lastState = false;
+    private int _cooldown = Reference.DRAW_SCREEN_EVENT_COOLDOWN;
+    private boolean _isProcessing = false;
     private static boolean isCorrectKeyBinding()
     {
         return ClientProxy.fullscreenKeyBinding != null && Keyboard.isKeyDown(ClientProxy.fullscreenKeyBinding.getKeyCode());
@@ -44,12 +47,16 @@ public class DrawScreenEventHandler {
     public void handleDrawScreenEvent(GuiScreenEvent.DrawScreenEvent event) {
 
         boolean newState = isCorrectKeyBinding();
-        if((_lastState != newState) && newState)
+        if(_cooldown == Reference.DRAW_SCREEN_EVENT_COOLDOWN && (_lastState != newState) && newState)
         {
+            _cooldown = 0;
             _lastState = newState;
             FullscreenWindowed.proxy.toggleFullScreen(!ClientProxy.currentState, Reference.AUTOMATIC_MONITOR_SELECTION);
         }
 
         _lastState = newState;
+
+        if(_cooldown < Reference.DRAW_SCREEN_EVENT_COOLDOWN)
+            _cooldown++;
     }
 }

@@ -30,5 +30,6 @@ public class Reference {
     public static final String VERSION = "@VERSION@";
     public static final String GUI_FACTORY_CLASS = "com.hancinworld.fw.client.gui.GuiFactory";
     public static final int AUTOMATIC_MONITOR_SELECTION = 0;
+    public static final int DRAW_SCREEN_EVENT_COOLDOWN = 40;
 
 }
