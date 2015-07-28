@@ -61,7 +61,7 @@ public class ClientProxy extends CommonProxy {
     {
 
         /* FIXME: Overrides the minecraft hotkey for fullscreen, as there are no hooks */
-        if(ConfigurationHandler.instance().getOverrideF11Behavior())
+        if(ConfigurationHandler.instance().isFullscreenWindowedEnabled())
         {
             Minecraft mc = Minecraft.getMinecraft();
             fullscreenKeyBinding = mc.gameSettings.field_152395_am;
@@ -156,15 +156,11 @@ public class ClientProxy extends CommonProxy {
         if(desiredMonitor < 0 || desiredMonitor == Reference.AUTOMATIC_MONITOR_SELECTION) {
             //find which monitor we should be using based on the center of the MC window
             screenBounds = findCurrentScreenDimensionsAndPosition((int) centerCoordinates.getX(), (int) centerCoordinates.getY());
-            if(goFullScreen)
-                ConfigurationHandler.instance().setFullscreenMonitor(Reference.AUTOMATIC_MONITOR_SELECTION);
-
         }else{
             screenBounds = findScreenDimensionsByID(desiredMonitor);
 
             if(screenBounds == null){
                 screenBounds = findCurrentScreenDimensionsAndPosition((int) centerCoordinates.getX(), (int) centerCoordinates.getY());
-                ConfigurationHandler.instance().setFullscreenMonitor(Reference.AUTOMATIC_MONITOR_SELECTION);
             }
         }
 
@@ -198,9 +194,16 @@ public class ClientProxy extends CommonProxy {
     @SuppressWarnings("deprecated")
     public void performStartupChecks()
     {
-        //FIXME: Living dangerously here... Is there a better way of doing this?
-        SplashProgress.pause();
-        toggleFullScreen(_startupRequestedSetting || ConfigurationHandler.instance().getFullscreenWindowedStartup(), ConfigurationHandler.instance().getFullscreenMonitor());
-        SplashProgress.resume();
+        if(ConfigurationHandler.instance().isFullscreenWindowedEnabled())
+        {
+            //FIXME: Living dangerously here... Is there a better way of doing this?
+            SplashProgress.pause();
+            toggleFullScreen(_startupRequestedSetting, ConfigurationHandler.instance().getFullscreenMonitor());
+            SplashProgress.resume();
+        }
+        else
+        {
+            Minecraft.getMinecraft().gameSettings.fullScreen = _startupRequestedSetting;
+        }
     }
 }

@@ -22,7 +22,6 @@
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.hancinworld.fw.handler;
 
-import com.hancinworld.fw.FullscreenWindowed;
 import com.hancinworld.fw.reference.Reference;
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -38,13 +37,11 @@ public class ConfigurationHandler {
     private Configuration _configuration;
     private static ConfigurationHandler _instance;
 
-    private Property _overrideF11Behavior = null;
-    private Property _fullscreenWindowedStartup = null;
+    private Property _enableFullscreenWindowed = null;
     private Property _fullscreenMonitor = null;
     private boolean _commitImmediately = true;
 
-    private boolean _isInitializing = false;
-
+    private boolean _isInitializing = true;
 
     private ConfigurationHandler()
     {
@@ -82,31 +79,16 @@ public class ConfigurationHandler {
         }
     }
 
-    public boolean getOverrideF11Behavior()
+    public boolean isFullscreenWindowedEnabled()
     {
-        if(_overrideF11Behavior == null)
+        if(_enableFullscreenWindowed == null)
             return true;
 
-        return _overrideF11Behavior.getBoolean(true);
+        return _enableFullscreenWindowed.getBoolean(true);
     }
-    public void setOverrideF11Behavior(boolean value)
+    public void setFullscreenWindowedEnabled(boolean value)
     {
-        _overrideF11Behavior.set(value);
-
-        if(_commitImmediately && _configuration.hasChanged())
-            _configuration.save();
-    }
-
-    public boolean getFullscreenWindowedStartup()
-    {
-        if(_fullscreenWindowedStartup == null)
-            return false;
-
-        return _fullscreenWindowedStartup.getBoolean(true);
-    }
-    public void setFullscreenWindowedStartup(boolean value)
-    {
-        _fullscreenWindowedStartup.set(value);
+        _enableFullscreenWindowed.set(value);
 
         if(_commitImmediately && _configuration.hasChanged())
             _configuration.save();
@@ -140,8 +122,7 @@ public class ConfigurationHandler {
 
     private void load()
     {
-        _overrideF11Behavior = _configuration.get(Configuration.CATEGORY_GENERAL, "overrideF11Behavior", true, StatCollector.translateToLocal("comment.fullscreenwindowed.overridef11behavior"));
-        _fullscreenWindowedStartup = _configuration.get(Configuration.CATEGORY_GENERAL, "fullscreenWindowedStartup", false, StatCollector.translateToLocal("comment.fullscreenwindowed.fullscreenwindowedstartup"));
+        _enableFullscreenWindowed = _configuration.get(Configuration.CATEGORY_GENERAL, "enableFullscreenWindowed", true, StatCollector.translateToLocal("comment.fullscreenwindowed.enableFullscreenWindowed"));
         _fullscreenMonitor = _configuration.get(Configuration.CATEGORY_GENERAL, "fullscreenMonitor", 0, StatCollector.translateToLocal("comment.fullscreenwindowed.fullscreenmonitor"));
 
         if (_configuration.hasChanged()) {
