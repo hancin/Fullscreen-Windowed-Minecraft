@@ -32,7 +32,7 @@ public class KeyInputEventHandler {
 
     private static boolean isCorrectKeyBinding()
     {
-        return ClientProxy.fullscreenKeyBinding.isPressed();
+        return ClientProxy.fullscreenKeyBinding != null && ClientProxy.fullscreenKeyBinding.isPressed();
     }
 
     @SubscribeEvent

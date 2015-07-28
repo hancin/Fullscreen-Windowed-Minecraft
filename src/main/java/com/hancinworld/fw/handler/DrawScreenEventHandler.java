@@ -37,7 +37,7 @@ public class DrawScreenEventHandler {
     private boolean _lastState = false;
     private static boolean isCorrectKeyBinding()
     {
-        return Keyboard.isKeyDown(ClientProxy.fullscreenKeyBinding.getKeyCode());
+        return ClientProxy.fullscreenKeyBinding != null && Keyboard.isKeyDown(ClientProxy.fullscreenKeyBinding.getKeyCode());
     }
 
     @SubscribeEvent
