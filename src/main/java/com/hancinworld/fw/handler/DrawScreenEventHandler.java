@@ -20,47 +20,36 @@
 //        ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //        (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-package com.hancinworld.fw;
+package com.hancinworld.fw.handler;
 
-import com.hancinworld.fw.handler.*;
-import com.hancinworld.fw.proxy.IProxy;
+import com.hancinworld.fw.FullscreenWindowed;
+import com.hancinworld.fw.proxy.ClientProxy;
 import com.hancinworld.fw.reference.Reference;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.*;
-import net.minecraftforge.common.MinecraftForge;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import org.lwjgl.input.Keyboard;
 
-@Mod(modid = Reference.MOD_ID, name=Reference.MOD_NAME,version=Reference.VERSION,guiFactory = Reference.GUI_FACTORY_CLASS)
-public class FullscreenWindowed {
+/**
+ * We need to register for this event because we want fullscreen to be global.
+ */
+public class DrawScreenEventHandler {
 
-    @SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS)
-    public static IProxy proxy;
-
-    @Mod.Instance(Reference.MOD_ID)
-    public static FullscreenWindowed instance;
-
-
-    @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event)
+    private boolean _lastState = false;
+    private static boolean isCorrectKeyBinding()
     {
-        //Items and blocks
-        ConfigurationHandler.instance().init(event.getSuggestedConfigurationFile());
-        FMLCommonHandler.instance().bus().register(ConfigurationHandler.instance());
-        FMLCommonHandler.instance().bus().register(new KeyInputEventHandler());
-        MinecraftForge.EVENT_BUS.register(new DrawScreenEventHandler());
-
+        return Keyboard.isKeyDown(ClientProxy.fullscreenKeyBinding.getKeyCode());
     }
 
-    @Mod.EventHandler
-    public void init(FMLInitializationEvent event) {
-        proxy.registerKeyBindings();
+    @SubscribeEvent
+    public void handleDrawScreenEvent(GuiScreenEvent.DrawScreenEvent event) {
 
+        boolean newState = isCorrectKeyBinding();
+        if((_lastState != newState) && newState)
+        {
+            _lastState = newState;
+            FullscreenWindowed.proxy.toggleFullScreen(!ClientProxy.currentState, Reference.AUTOMATIC_MONITOR_SELECTION);
+        }
+
+        _lastState = newState;
     }
-
-    @Mod.EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
-        proxy.performStartupChecks();
-    }
-
 }
