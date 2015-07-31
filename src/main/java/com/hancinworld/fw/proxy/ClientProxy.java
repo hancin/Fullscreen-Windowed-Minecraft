@@ -211,10 +211,15 @@ public class ClientProxy extends CommonProxy {
     {
         if(ConfigurationHandler.instance().isFullscreenWindowedEnabled())
         {
-            //FIXME: Living dangerously here... Is there a better way of doing this?
-            SplashProgress.pause();
-            toggleFullScreen(_startupRequestedSetting, ConfigurationHandler.instance().getFullscreenMonitor());
-            SplashProgress.resume();
+            try {
+                //FIXME: Living dangerously here... Is there a better way of doing this?
+                SplashProgress.pause();
+                toggleFullScreen(_startupRequestedSetting, ConfigurationHandler.instance().getFullscreenMonitor());
+                SplashProgress.resume();
+            }catch(NoClassDefFoundError e) {
+                LogHelper.warn("Error while doing startup checks, are you using an old version of Forge ? " + e);
+                toggleFullScreen(_startupRequestedSetting, ConfigurationHandler.instance().getFullscreenMonitor());
+            }
         }
         else
         {
