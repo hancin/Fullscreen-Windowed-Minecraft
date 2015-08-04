@@ -86,12 +86,6 @@ public class ClientProxy extends CommonProxy {
 
     private Rectangle findCurrentScreenDimensionsAndPosition(int x, int y)
     {
-         //clamp value to the positive realm
-         if(x < 0)
-             x = 0;
-         if(y < 0)
-             y = 0;
-
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice[] screens = env.getScreenDevices();
 
