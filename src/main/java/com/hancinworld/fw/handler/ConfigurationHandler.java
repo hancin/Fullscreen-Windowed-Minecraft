@@ -24,9 +24,9 @@ package com.hancinworld.fw.handler;
 
 import com.hancinworld.fw.FullscreenWindowed;
 import com.hancinworld.fw.reference.Reference;
-import cpw.mods.fml.client.event.ConfigChangedEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import net.minecraft.util.StatCollector;
+import net.minecraft.client.resources.I18n;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -75,7 +75,7 @@ public class ConfigurationHandler {
     @SubscribeEvent
     public void onConfigurationChangedEvent(ConfigChangedEvent.OnConfigChangedEvent event)
     {
-        if(event.modID.equalsIgnoreCase(Reference.MOD_ID)) {
+        if(event.getModID().equalsIgnoreCase(Reference.MOD_ID)) {
             load();
             if(!_isInitializing){
                 FullscreenWindowed.proxy.registerKeyBindings();
@@ -126,8 +126,8 @@ public class ConfigurationHandler {
 
     private void load()
     {
-        _enableFullscreenWindowed = _configuration.get(Configuration.CATEGORY_GENERAL, "enableFullscreenWindowed", true, StatCollector.translateToLocal("comment.fullscreenwindowed.enableFullscreenWindowed"));
-        _fullscreenMonitor = _configuration.get(Configuration.CATEGORY_GENERAL, "fullscreenMonitor", 0, StatCollector.translateToLocal("comment.fullscreenwindowed.fullscreenmonitor"));
+        _enableFullscreenWindowed = _configuration.get(Configuration.CATEGORY_GENERAL, "enableFullscreenWindowed", true, I18n.format("comment.fullscreenwindowed.enableFullscreenWindowed"));
+        _fullscreenMonitor = _configuration.get(Configuration.CATEGORY_GENERAL, "fullscreenMonitor", 0, I18n.format("comment.fullscreenwindowed.fullscreenmonitor"));
 
         if (_configuration.hasChanged()) {
             _configuration.save();
