@@ -62,7 +62,7 @@ public class DrawScreenEventHandler {
         boolean newState = isCorrectKeyBinding();
         if(_initialFullscreen && _cooldown >= Reference.DRAW_SCREEN_EVENT_COOLDOWN) {
             _cooldown = 0;
-            _initialGoFullScreen = false;
+            _initialFullscreen = false;
             FullscreenWindowed.proxy.toggleFullScreen(_initialGoFullScreen, _initialDesiredMonitor);
         }
         else if(_cooldown >= Reference.DRAW_SCREEN_EVENT_COOLDOWN && (_lastState != newState) && newState)
