@@ -35,11 +35,20 @@ import java.io.File;
 
 public class ConfigurationHandler {
 
+    public static final String CATEGORY_ADVANCED = "advanced";
     private Configuration _configuration;
     private static ConfigurationHandler _instance;
 
     private Property _enableFullscreenWindowed = null;
     private Property _fullscreenMonitor = null;
+    private Property _enableAdvancedFeatures = null;
+    private Property _customFullscreenDimensions = null;
+    private Property _customFullscreenDimensionsX = null;
+    private Property _customFullscreenDimensionsY = null;
+    private Property _customFullscreenDimensionsW = null;
+    private Property _customFullscreenDimensionsH = null;
+    private Property _onlyRemoveDecorations = null;
+
     private boolean _commitImmediately = true;
 
     private boolean _isInitializing = true;
@@ -114,6 +123,120 @@ public class ConfigurationHandler {
             _configuration.save();
     }
 
+
+    public boolean areAdvancedFeaturesEnabled()
+    {
+        if(_enableAdvancedFeatures == null)
+            return Reference.ADVANCED_FEATURES_ENABLED;
+
+        return _enableAdvancedFeatures.getBoolean(Reference.ADVANCED_FEATURES_ENABLED);
+    }
+
+    public void setAdvancedFeaturesEnabled(boolean value)
+    {
+        _enableAdvancedFeatures.set(value);
+
+        if(_commitImmediately && _configuration.hasChanged())
+            _configuration.save();
+    }
+
+
+    public boolean isOnlyRemoveDecorations()
+    {
+        if(_onlyRemoveDecorations == null)
+            return Reference.ONLY_REMOVE_DECORATIONS;
+
+        return _onlyRemoveDecorations.getBoolean(Reference.ONLY_REMOVE_DECORATIONS);
+    }
+
+    public void setOnlyRemoveDecorations(boolean value)
+    {
+        _onlyRemoveDecorations.set(value);
+
+        if(_commitImmediately && _configuration.hasChanged())
+            _configuration.save();
+    }
+
+    public boolean isCustomFullscreenDimensions()
+    {
+        if(_customFullscreenDimensions == null)
+            return Reference.CUSTOM_FULLSCREEN_DIMENSIONS;
+
+        return _customFullscreenDimensions.getBoolean(Reference.CUSTOM_FULLSCREEN_DIMENSIONS);
+    }
+
+    public void setCustomFullscreenDimensions(boolean value)
+    {
+        _customFullscreenDimensions.set(value);
+
+        if(_commitImmediately && _configuration.hasChanged())
+            _configuration.save();
+    }
+
+
+    public int getCustomFullscreenDimensionsX()
+    {
+        if(_customFullscreenDimensionsX == null)
+            return Reference.CUSTOM_FULLSCREEN_X;
+
+        return _customFullscreenDimensionsX.getInt(Reference.CUSTOM_FULLSCREEN_X);
+    }
+
+    public void setCustomFullscreenDimensionsX(int value)
+    {
+        _customFullscreenDimensionsX.set(value);
+
+        if(_commitImmediately && _configuration.hasChanged())
+            _configuration.save();
+    }
+
+    public int getCustomFullscreenDimensionsY()
+    {
+        if(_customFullscreenDimensionsY == null)
+            return Reference.CUSTOM_FULLSCREEN_Y;
+
+        return _customFullscreenDimensionsY.getInt(Reference.CUSTOM_FULLSCREEN_Y);
+    }
+
+    public void setCustomFullscreenDimensionsY(int value)
+    {
+        _customFullscreenDimensionsY.set(value);
+
+        if(_commitImmediately && _configuration.hasChanged())
+            _configuration.save();
+    }
+    public int getCustomFullscreenDimensionsW()
+    {
+        if(_customFullscreenDimensionsW == null)
+            return Reference.CUSTOM_FULLSCREEN_W;
+
+        return _customFullscreenDimensionsW.getInt(Reference.CUSTOM_FULLSCREEN_W);
+    }
+
+    public void setCustomFullscreenDimensionsW(int value)
+    {
+        _customFullscreenDimensionsW.set(value);
+
+        if(_commitImmediately && _configuration.hasChanged())
+            _configuration.save();
+    }
+    public int getCustomFullscreenDimensionsH()
+    {
+        if(_customFullscreenDimensionsH == null)
+            return Reference.CUSTOM_FULLSCREEN_H;
+
+        return _customFullscreenDimensionsH.getInt(Reference.CUSTOM_FULLSCREEN_H);
+    }
+
+    public void setCustomFullscreenDimensionsH(int value)
+    {
+        _customFullscreenDimensionsH.set(value);
+
+        if(_commitImmediately && _configuration.hasChanged())
+            _configuration.save();
+    }
+
+
     public boolean isCommitImmediately()
     {
         return _commitImmediately;
@@ -127,7 +250,17 @@ public class ConfigurationHandler {
     private void load()
     {
         _enableFullscreenWindowed = _configuration.get(Configuration.CATEGORY_GENERAL, "enableFullscreenWindowed", true, I18n.format("comment.fullscreenwindowed.enableFullscreenWindowed"));
-        _fullscreenMonitor = _configuration.get(Configuration.CATEGORY_GENERAL, "fullscreenMonitor", 0, I18n.format("comment.fullscreenwindowed.fullscreenmonitor"));
+        _fullscreenMonitor = _configuration.get(Configuration.CATEGORY_GENERAL, "fullscreenMonitor", Reference.AUTOMATIC_MONITOR_SELECTION, I18n.format("comment.fullscreenwindowed.fullscreenmonitor"));
+        _enableAdvancedFeatures = _configuration.get(ConfigurationHandler.CATEGORY_ADVANCED, "enableAdvancedFeatures", Reference.ADVANCED_FEATURES_ENABLED, I18n.format("comment.fullscreenwindowed.enableAdvancedFeatures"));
+
+        _customFullscreenDimensions = _configuration.get(ConfigurationHandler.CATEGORY_ADVANCED, "customFullscreenDimensions", false, I18n.format("comment.fullscreenwindowed.customFullscreenDimensions"));
+        _customFullscreenDimensionsX = _configuration.get(ConfigurationHandler.CATEGORY_ADVANCED, "customFullscreenDimensionsX", 0, I18n.format("comment.fullscreenwindowed.customFullscreenDimensionsX"));
+        _customFullscreenDimensionsY = _configuration.get(ConfigurationHandler.CATEGORY_ADVANCED, "customFullscreenDimensionsY", 0, I18n.format("comment.fullscreenwindowed.customFullscreenDimensionsY"));
+        _customFullscreenDimensionsW = _configuration.get(ConfigurationHandler.CATEGORY_ADVANCED, "customFullscreenDimensionsW", 0, I18n.format("comment.fullscreenwindowed.customFullscreenDimensionsW"));
+        _customFullscreenDimensionsH = _configuration.get(ConfigurationHandler.CATEGORY_ADVANCED, "customFullscreenDimensionsH", 0, I18n.format("comment.fullscreenwindowed.customFullscreenDimensionsH"));
+
+        //TODO: due to how LWJGL draws windows, it's not a good idea to have this... disabled until I can fix the bugs with X,Y being off due to decoration shadows.
+        //_onlyRemoveDecorations = _configuration.get(ConfigurationHandler.CATEGORY_ADVANCED, "onlyRemoveDecorations", Reference.ONLY_REMOVE_DECORATIONS, I18n.format("comment.fullscreenwindowed.onlyRemoveDecorations"));
 
         if (_configuration.hasChanged()) {
             _configuration.save();

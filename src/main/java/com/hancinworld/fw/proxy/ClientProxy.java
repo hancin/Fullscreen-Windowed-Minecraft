@@ -22,6 +22,7 @@
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.hancinworld.fw.proxy;
 
+import com.hancinworld.fw.FullscreenWindowed;
 import com.hancinworld.fw.handler.ConfigurationHandler;
 import com.hancinworld.fw.reference.Reference;
 import com.hancinworld.fw.utility.LogHelper;
@@ -137,6 +138,40 @@ public class ClientProxy extends CommonProxy {
         }
     }
 
+    private Rectangle getAppropriateScreenBounds(Rectangle currentCoordinates, int desiredMonitor)
+    {
+        Rectangle screenBounds;
+        Point centerCoordinates = new Point((int) (currentCoordinates.getMinX() + currentCoordinates.getWidth() / 2), (int) (currentCoordinates.getMinY() + currentCoordinates.getHeight() / 2));
+
+        ConfigurationHandler configuration = ConfigurationHandler.instance();
+        if(configuration.areAdvancedFeaturesEnabled() && configuration.isOnlyRemoveDecorations()){
+            screenBounds = currentCoordinates;
+        }
+        else if(configuration.areAdvancedFeaturesEnabled() && configuration.isCustomFullscreenDimensions() && (configuration.getCustomFullscreenDimensionsH() > 256 && configuration.getCustomFullscreenDimensionsW() > 256))
+        {
+            screenBounds = new Rectangle(configuration.getCustomFullscreenDimensionsX(),configuration.getCustomFullscreenDimensionsY(), configuration.getCustomFullscreenDimensionsW(),configuration.getCustomFullscreenDimensionsH());
+
+            //If you've selected a monitor, then X & Y are offsets - easier to do math.
+            if(desiredMonitor > 0) {
+                Rectangle actualScreenBounds = findScreenDimensionsByID(desiredMonitor);
+                if(actualScreenBounds != null){
+                    screenBounds.setLocation(actualScreenBounds.x + screenBounds.x, actualScreenBounds.y + screenBounds.y);
+                }
+            }
+        }
+        else if(desiredMonitor < 0 || desiredMonitor == Reference.AUTOMATIC_MONITOR_SELECTION) {
+            //find which monitor we should be using based on the center of the MC window
+            screenBounds = findCurrentScreenDimensionsAndPosition((int) centerCoordinates.getX(), (int) centerCoordinates.getY());
+        }else{
+            screenBounds = findScreenDimensionsByID(desiredMonitor);
+
+            if(screenBounds == null){
+                screenBounds = findCurrentScreenDimensionsAndPosition((int) centerCoordinates.getX(), (int) centerCoordinates.getY());
+            }
+        }
+
+        return screenBounds;
+    }
 
     @Override
     public void toggleFullScreen(boolean goFullScreen, int desiredMonitor) {
@@ -149,29 +184,16 @@ public class ClientProxy extends CommonProxy {
         if(currentState == goFullScreen && !Display.isFullscreen())
             return;
 
-        //Changing this property and causing a Display update will cause LWJGL to add/remove decorations (borderless).
-        System.setProperty("org.lwjgl.opengl.Window.undecorated", goFullScreen?"true":"false");
-
         //Save our current display parameters
         Rectangle currentCoordinates = new Rectangle(Display.getX(), Display.getY(), Display.getWidth(), Display.getHeight());
         if(goFullScreen)
             _savedWindowedBounds = currentCoordinates;
 
+        //Changing this property and causing a Display update will cause LWJGL to add/remove decorations (borderless).
+        System.setProperty("org.lwjgl.opengl.Window.undecorated", goFullScreen?"true":"false");
 
-        Rectangle screenBounds;
-        Point centerCoordinates = new Point((int) (currentCoordinates.getMinX() + currentCoordinates.getWidth() / 2), (int) (currentCoordinates.getMinY() + currentCoordinates.getHeight() / 2));
 
-
-        if(desiredMonitor < 0 || desiredMonitor == Reference.AUTOMATIC_MONITOR_SELECTION) {
-            //find which monitor we should be using based on the center of the MC window
-            screenBounds = findCurrentScreenDimensionsAndPosition((int) centerCoordinates.getX(), (int) centerCoordinates.getY());
-        }else{
-            screenBounds = findScreenDimensionsByID(desiredMonitor);
-
-            if(screenBounds == null){
-                screenBounds = findCurrentScreenDimensionsAndPosition((int) centerCoordinates.getX(), (int) centerCoordinates.getY());
-            }
-        }
+        Rectangle screenBounds = getAppropriateScreenBounds(currentCoordinates, desiredMonitor);
 
         //This is the new bounds we have to apply.
         Rectangle newBounds = goFullScreen ? screenBounds : _savedWindowedBounds;
@@ -187,8 +209,7 @@ public class ClientProxy extends CommonProxy {
 
             Display.update();
 
-            Display.setLocation((int) newBounds.getMinX(), (int)newBounds.getMinY());
-
+            Display.setLocation(newBounds.x, newBounds.y);
 
             callMinecraftResizeMethod((int)newBounds.getWidth(), (int)newBounds.getHeight());
 
@@ -205,15 +226,7 @@ public class ClientProxy extends CommonProxy {
     {
         if(ConfigurationHandler.instance().isFullscreenWindowedEnabled())
         {
-            try {
-                //FIXME: Living dangerously here... Is there a better way of doing this?
-                SplashProgress.pause();
-                toggleFullScreen(_startupRequestedSetting, ConfigurationHandler.instance().getFullscreenMonitor());
-                SplashProgress.resume();
-            }catch(NoClassDefFoundError e) {
-                LogHelper.warn("Error while doing startup checks, are you using an old version of Forge ? " + e);
-                toggleFullScreen(_startupRequestedSetting, ConfigurationHandler.instance().getFullscreenMonitor());
-            }
+            FullscreenWindowed.instance.dsHandler.setInitialFullscreen(_startupRequestedSetting,  ConfigurationHandler.instance().getFullscreenMonitor());
         }
         else
         {

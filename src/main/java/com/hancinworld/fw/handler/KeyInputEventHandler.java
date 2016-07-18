@@ -42,7 +42,7 @@ public class KeyInputEventHandler {
         if(isCorrectKeyBinding())
         {
 
-            FullscreenWindowed.proxy.toggleFullScreen(!ClientProxy.currentState, Reference.AUTOMATIC_MONITOR_SELECTION);
+            FullscreenWindowed.proxy.toggleFullScreen(!ClientProxy.currentState, ConfigurationHandler.instance().getFullscreenMonitor());
         }
     }
 }

@@ -26,6 +26,7 @@ import com.hancinworld.fw.FullscreenWindowed;
 import com.hancinworld.fw.proxy.ClientProxy;
 import com.hancinworld.fw.reference.Reference;
 import com.hancinworld.fw.utility.LogHelper;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import org.lwjgl.input.Keyboard;
@@ -36,6 +37,9 @@ import org.lwjgl.input.Keyboard;
 public class DrawScreenEventHandler {
 
     private boolean _lastState = false;
+    private boolean _initialFullscreen = false;
+    private boolean _initialGoFullScreen = false;
+    private int _initialDesiredMonitor = 0;
     private int _cooldown = Reference.DRAW_SCREEN_EVENT_COOLDOWN;
     private boolean _isProcessing = false;
     private static boolean isCorrectKeyBinding()
@@ -43,15 +47,29 @@ public class DrawScreenEventHandler {
         return ClientProxy.fullscreenKeyBinding != null && Keyboard.isKeyDown(ClientProxy.fullscreenKeyBinding.getKeyCode());
     }
 
+    public void setInitialFullscreen(boolean goFullScreen, int desiredMonitor)
+    {
+        // This is truly a hack to prevent a GL context problem during startup... we just delay fullscreen initialization by 0.75 seconds after game load.
+        _cooldown = 25;
+        _initialFullscreen = true;
+        _initialGoFullScreen = goFullScreen;
+        _initialDesiredMonitor = desiredMonitor;
+    }
+
     @SubscribeEvent
     public void handleDrawScreenEvent(GuiScreenEvent.DrawScreenEvent event) {
 
         boolean newState = isCorrectKeyBinding();
-        if(_cooldown == Reference.DRAW_SCREEN_EVENT_COOLDOWN && (_lastState != newState) && newState)
+        if(_initialFullscreen && _cooldown >= Reference.DRAW_SCREEN_EVENT_COOLDOWN) {
+            _cooldown = 0;
+            _initialGoFullScreen = false;
+            FullscreenWindowed.proxy.toggleFullScreen(_initialGoFullScreen, _initialDesiredMonitor);
+        }
+        else if(_cooldown >= Reference.DRAW_SCREEN_EVENT_COOLDOWN && (_lastState != newState) && newState)
         {
             _cooldown = 0;
             _lastState = newState;
-            FullscreenWindowed.proxy.toggleFullScreen(!ClientProxy.currentState, Reference.AUTOMATIC_MONITOR_SELECTION);
+            FullscreenWindowed.proxy.toggleFullScreen(!ClientProxy.currentState, ConfigurationHandler.instance().getFullscreenMonitor());
         }
 
         _lastState = newState;

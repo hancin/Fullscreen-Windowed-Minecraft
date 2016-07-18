@@ -40,6 +40,7 @@ public class FullscreenWindowed {
     @Mod.Instance(Reference.MOD_ID)
     public static FullscreenWindowed instance;
 
+    public DrawScreenEventHandler dsHandler;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
@@ -48,7 +49,8 @@ public class FullscreenWindowed {
         ConfigurationHandler.instance().init(event.getSuggestedConfigurationFile());
         FMLCommonHandler.instance().bus().register(ConfigurationHandler.instance());
         FMLCommonHandler.instance().bus().register(new KeyInputEventHandler());
-        MinecraftForge.EVENT_BUS.register(new DrawScreenEventHandler());
+        dsHandler = new DrawScreenEventHandler();
+        MinecraftForge.EVENT_BUS.register(dsHandler);
 
     }
 
