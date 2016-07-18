@@ -25,8 +25,8 @@ package com.hancinworld.fw.proxy;
 import com.hancinworld.fw.handler.ConfigurationHandler;
 import com.hancinworld.fw.reference.Reference;
 import com.hancinworld.fw.utility.LogHelper;
-import cpw.mods.fml.client.SplashProgress;
-import cpw.mods.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.client.SplashProgress;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.LWJGLException;
@@ -64,8 +64,8 @@ public class ClientProxy extends CommonProxy {
         if(fullscreenKeyBinding == null && ConfigurationHandler.instance().isFullscreenWindowedEnabled())
         {
             Minecraft mc = Minecraft.getMinecraft();
-            fullscreenKeyBinding = mc.gameSettings.field_152395_am;
-            mc.gameSettings.field_152395_am = ignoreKeyBinding;
+            fullscreenKeyBinding = mc.gameSettings.keyBindFullscreen;
+            mc.gameSettings.keyBindFullscreen = ignoreKeyBinding;
 
             if(Display.isFullscreen()){
                 toggleFullScreen(true, Reference.AUTOMATIC_MONITOR_SELECTION);
@@ -75,7 +75,7 @@ public class ClientProxy extends CommonProxy {
         {
 
             Minecraft mc = Minecraft.getMinecraft();
-            mc.gameSettings.field_152395_am = fullscreenKeyBinding;
+            mc.gameSettings.keyBindFullscreen = fullscreenKeyBinding;
             fullscreenKeyBinding = null;
 
             if(currentState){
