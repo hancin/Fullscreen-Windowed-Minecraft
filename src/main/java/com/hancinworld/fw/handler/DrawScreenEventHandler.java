@@ -49,8 +49,8 @@ public class DrawScreenEventHandler {
 
     public void setInitialFullscreen(boolean goFullScreen, int desiredMonitor)
     {
-        // This is truly a hack to prevent a GL context problem during startup... we just delay fullscreen initialization by 0.75 seconds after game load.
-        _cooldown = 25;
+        // This is truly a hack to prevent a GL context problem during startup... we just delay fullscreen initialization by 0.25 seconds after game load.
+        _cooldown = 35;
         _initialFullscreen = true;
         _initialGoFullScreen = goFullScreen;
         _initialDesiredMonitor = desiredMonitor;

@@ -48,6 +48,7 @@ public class ConfigurationHandler {
     private Property _customFullscreenDimensionsW = null;
     private Property _customFullscreenDimensionsH = null;
     private Property _onlyRemoveDecorations = null;
+    private Property _enableMaximumCompatibility = null;
 
     private boolean _commitImmediately = true;
 
@@ -174,6 +175,23 @@ public class ConfigurationHandler {
     }
 
 
+    public boolean isMaximumCompatibilityEnabled()
+    {
+        if(_enableMaximumCompatibility == null)
+            return Reference.ENABLE_MAXIMUM_COMPATIBILITY;
+
+        return _enableMaximumCompatibility.getBoolean(Reference.ENABLE_MAXIMUM_COMPATIBILITY);
+    }
+
+    public void setEnableMaximumCompatibility(boolean value)
+    {
+        _enableMaximumCompatibility.set(value);
+
+        if(_commitImmediately && _configuration.hasChanged())
+            _configuration.save();
+    }
+
+
     public int getCustomFullscreenDimensionsX()
     {
         if(_customFullscreenDimensionsX == null)
@@ -252,6 +270,7 @@ public class ConfigurationHandler {
         _enableFullscreenWindowed = _configuration.get(Configuration.CATEGORY_GENERAL, "enableFullscreenWindowed", true, I18n.format("comment.fullscreenwindowed.enableFullscreenWindowed"));
         _fullscreenMonitor = _configuration.get(Configuration.CATEGORY_GENERAL, "fullscreenMonitor", Reference.AUTOMATIC_MONITOR_SELECTION, I18n.format("comment.fullscreenwindowed.fullscreenmonitor"));
         _enableAdvancedFeatures = _configuration.get(ConfigurationHandler.CATEGORY_ADVANCED, "enableAdvancedFeatures", Reference.ADVANCED_FEATURES_ENABLED, I18n.format("comment.fullscreenwindowed.enableAdvancedFeatures"));
+        _enableMaximumCompatibility = _configuration.get(Configuration.CATEGORY_GENERAL, "enableMaximumCompatibility", Reference.ENABLE_MAXIMUM_COMPATIBILITY, I18n.format("comment.fullscreenwindowed.enableMaximumCompatibility"));
 
         _customFullscreenDimensions = _configuration.get(ConfigurationHandler.CATEGORY_ADVANCED, "customFullscreenDimensions", false, I18n.format("comment.fullscreenwindowed.customFullscreenDimensions"));
         _customFullscreenDimensionsX = _configuration.get(ConfigurationHandler.CATEGORY_ADVANCED, "customFullscreenDimensionsX", 0, I18n.format("comment.fullscreenwindowed.customFullscreenDimensionsX"));

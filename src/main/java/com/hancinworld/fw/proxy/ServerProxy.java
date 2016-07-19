@@ -20,47 +20,28 @@
 //        ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //        (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-package com.hancinworld.fw;
+package com.hancinworld.fw.proxy;
 
-import com.hancinworld.fw.handler.*;
-import com.hancinworld.fw.proxy.IProxy;
-import com.hancinworld.fw.reference.Reference;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.*;
-import net.minecraftforge.common.MinecraftForge;
+import java.io.File;
 
-@Mod(modid = Reference.MOD_ID, name=Reference.MOD_NAME,version=Reference.VERSION,guiFactory = Reference.GUI_FACTORY_CLASS, acceptedMinecraftVersions = Reference.MC_VERSIONS)
-public class FullscreenWindowed {
-
-    @SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.SERVER_PROXY_CLASS)
-    public static IProxy proxy;
-
-    @Mod.Instance(Reference.MOD_ID)
-    public static FullscreenWindowed instance;
-
-
-    @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event)
-    {
-        //Items and blocks
-        if(proxy != null)
-            proxy.subscribeEvents(event.getSuggestedConfigurationFile());
+public class ServerProxy extends CommonProxy {
+    @Override
+    public void toggleFullScreen(boolean state, int desiredMonitor) {
 
     }
 
-    @Mod.EventHandler
-    public void init(FMLInitializationEvent event) {
-        if(proxy != null)
-            proxy.registerKeyBindings();
+    @Override
+    public void performStartupChecks() {
 
     }
 
-    @Mod.EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
-        if(proxy != null)
-            proxy.performStartupChecks();
+    @Override
+    public void registerKeyBindings() {
+
     }
 
+    @Override
+    public void subscribeEvents(File configurationFile) {
+
+    }
 }
