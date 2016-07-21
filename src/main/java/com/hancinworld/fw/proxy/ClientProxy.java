@@ -29,9 +29,9 @@ import com.hancinworld.fw.handler.KeyInputEventHandler;
 import com.hancinworld.fw.reference.Reference;
 import com.hancinworld.fw.utility.LogHelper;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.SplashProgress;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import cpw.mods.fml.client.SplashProgress;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.relauncher.ReflectionHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.LWJGLException;
@@ -71,8 +71,8 @@ public class ClientProxy extends CommonProxy {
         if(fullscreenKeyBinding == null && ConfigurationHandler.instance().isFullscreenWindowedEnabled())
         {
             Minecraft mc = Minecraft.getMinecraft();
-            fullscreenKeyBinding = mc.gameSettings.keyBindFullscreen;
-            mc.gameSettings.keyBindFullscreen = ignoreKeyBinding;
+            fullscreenKeyBinding = mc.gameSettings.field_152395_am;
+            mc.gameSettings.field_152395_am = ignoreKeyBinding;
 
             if(Display.isFullscreen()){
                 toggleFullScreen(true, Reference.AUTOMATIC_MONITOR_SELECTION);
@@ -82,7 +82,7 @@ public class ClientProxy extends CommonProxy {
         {
 
             Minecraft mc = Minecraft.getMinecraft();
-            mc.gameSettings.keyBindFullscreen = fullscreenKeyBinding;
+            mc.gameSettings.field_152395_am = fullscreenKeyBinding;
             fullscreenKeyBinding = null;
 
             if(currentState){
@@ -252,7 +252,7 @@ public class ClientProxy extends CommonProxy {
             return;
         }
 
-        if(ConfigurationHandler.instance().isMaximumCompatibilityEnabled()){
+        if(ConfigurationHandler.instance().isMaximumCompatibilityEnabled()) {
             dsHandler.setInitialFullscreen(_startupRequestedSetting,  ConfigurationHandler.instance().getFullscreenMonitor());
         // This is the correct way to set fullscreen at launch, but LWJGL limitations means we might crash the game if
         // another mod tries to do a similar Display changing operation. Doesn't help the API says "don't use this"

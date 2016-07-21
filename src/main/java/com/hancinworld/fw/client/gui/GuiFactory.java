@@ -22,7 +22,7 @@
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.hancinworld.fw.client.gui;
 
-import net.minecraftforge.fml.client.IModGuiFactory;
+import cpw.mods.fml.client.IModGuiFactory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 

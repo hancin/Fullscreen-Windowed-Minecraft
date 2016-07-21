@@ -22,15 +22,12 @@
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.hancinworld.fw.proxy;
 
-
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-
 import java.io.File;
 
 public interface IProxy {
 
-    public void toggleFullScreen(boolean state, int desiredMonitor);
-    public void performStartupChecks();
-    public void registerKeyBindings();
-    public void subscribeEvents(File configurationFile);
+    void toggleFullScreen(boolean state, int desiredMonitor);
+    void performStartupChecks();
+    void registerKeyBindings();
+    void subscribeEvents(File configurationFile);
 }
