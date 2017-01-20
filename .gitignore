@@ -4,3 +4,5 @@ eclipse
 *.bin
 Fullscreen-Windowed-Minecraft.iws
 .gradle/2.0/taskArtifacts/taskArtifacts.bin
+build/
+Fullscreen-Windowed-Minecraftxxx.ipr

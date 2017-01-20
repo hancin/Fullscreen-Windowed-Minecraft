@@ -74,9 +74,8 @@ public class ClientProxy extends CommonProxy {
             fullscreenKeyBinding = mc.gameSettings.keyBindFullscreen;
             mc.gameSettings.keyBindFullscreen = ignoreKeyBinding;
 
-            if(Display.isFullscreen()){
-                toggleFullScreen(true, Reference.AUTOMATIC_MONITOR_SELECTION);
-            }
+            //Are we currently fullscreen? If yes this requires fixing.
+            _startupRequestedSetting = _startupRequestedSetting || Display.isFullscreen();
         }
         else if(fullscreenKeyBinding != null && !ConfigurationHandler.instance().isFullscreenWindowedEnabled())
         {
@@ -137,16 +136,8 @@ public class ClientProxy extends CommonProxy {
     private void callMinecraftResizeMethod(int w, int h)
     {
         try{
-            Class[] args = new Class[2];
-            args[0] = int.class;
-            args[1] = int.class;
             Minecraft inst = Minecraft.getMinecraft();
-            Method resizeMethod = ReflectionHelper.findMethod(Minecraft.class, inst, new String[]{"func_71370_a", "resize"}, args);
-            if(resizeMethod != null)
-            {
-                Display.update();
-                resizeMethod.invoke(inst, w, h);
-            }
+            inst.resize(w, h);
 
         }catch (Exception e){
             LogHelper.warn("Resize method not found or problem found while calling it. Are you using the correct version of the mod for this version of Minecraft?" + e.toString());
