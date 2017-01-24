@@ -1,4 +1,4 @@
-//Copyright (c) 2015, David Larochelle-Pratte
+//Copyright (c) 2015-2017, David Larochelle-Pratte
 //All rights reserved.
 //
 //        Redistribution and use in source and binary forms, with or without
@@ -20,23 +20,22 @@
 //        ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //        (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-package com.hancinworld.fw.client.gui;
+package com.hancinworld.fw.client.gui
 
-import com.hancinworld.fw.handler.ConfigurationHandler;
-import com.hancinworld.fw.reference.Reference;
-import net.minecraftforge.fml.client.config.GuiConfig;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraftforge.common.config.ConfigElement;
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiScreen
+import net.minecraftforge.fml.client.IModGuiFactory
 
+/**
+  * Created by David on 2015-02-02.
+  */
+class GuiFactory extends IModGuiFactory {
+  def initialize(minecraftInstance: Minecraft) {
+  }
 
-public class ModGuiConfig extends GuiConfig {
-    public ModGuiConfig (GuiScreen parentScreen)
-    {
-        super(parentScreen,
-                new ConfigElement(ConfigurationHandler.instance().getConfigurationCategory()).getChildElements(),
-                Reference.MOD_ID,
-                false,
-                false,
-                GuiConfig.getAbridgedConfigPath(ConfigurationHandler.instance().toString()));
-    }
+  def mainConfigGuiClass: Class[_ <: GuiScreen] = classOf[ModGuiConfig]
+
+  def runtimeGuiCategories = null
+
+  def getHandlerFor(element: IModGuiFactory.RuntimeOptionCategoryElement) = null
 }

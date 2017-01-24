@@ -1,4 +1,4 @@
-//Copyright (c) 2015, David Larochelle-Pratte
+//Copyright (c) 2015-2017, David Larochelle-Pratte
 //All rights reserved.
 //
 //        Redistribution and use in source and binary forms, with or without
@@ -20,47 +20,41 @@
 //        ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //        (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-package com.hancinworld.fw;
+package com.hancinworld.fw.handler
 
-import com.hancinworld.fw.handler.*;
-import com.hancinworld.fw.proxy.IProxy;
-import com.hancinworld.fw.reference.Reference;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.*;
-import net.minecraftforge.common.MinecraftForge;
+import com.hancinworld.fw.FullscreenWindowed
+import com.hancinworld.fw.reference.Reference
+import net.minecraftforge.client.event.GuiScreenEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
-@Mod(modid = Reference.MOD_ID, clientSideOnly=true, name=Reference.MOD_NAME,version=Reference.VERSION,guiFactory = Reference.GUI_FACTORY_CLASS, acceptedMinecraftVersions = Reference.MC_VERSIONS)
-public class FullscreenWindowed {
+/**
+  * We need to register for this event because we want fullscreen to be global.
+  */
+class DrawScreenEventHandler {
+  private var _lastState = false
+  private var _initialFullscreen = true
+  private var _cooldown = Reference.DRAW_SCREEN_EVENT_COOLDOWN - 5
 
-    @SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS)
-    public static IProxy proxy;
-
-    @Mod.Instance(Reference.MOD_ID)
-    public static FullscreenWindowed instance;
-
-
-    @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event)
-    {
-        //Items and blocks
-        if(proxy != null)
-            proxy.subscribeEvents(event.getSuggestedConfigurationFile());
-
+  @SubscribeEvent
+  def handleDrawScreenEvent(event: GuiScreenEvent.DrawScreenEvent) {
+    val newState = FullscreenWindowed.proxy.isCorrectKeyPressed
+    if (_initialFullscreen && _cooldown >= Reference.DRAW_SCREEN_EVENT_COOLDOWN) {
+      FullscreenWindowed.log.info("Initial tick fullscreen")
+      _cooldown = 0
+      _initialFullscreen = false
+      FullscreenWindowed.proxy.handleInitialFullscreen
+    }
+    FullscreenWindowed.log.info(_lastState)
+    FullscreenWindowed.log.info(newState)
+    if (!_initialFullscreen && _cooldown >= Reference.DRAW_SCREEN_EVENT_COOLDOWN && (_lastState != newState) && newState) {
+      FullscreenWindowed.log.info("State change")
+      _cooldown = 0
+      FullscreenWindowed.proxy.toggleFullScreen
     }
 
-    @Mod.EventHandler
-    public void init(FMLInitializationEvent event) {
-        if(proxy != null)
-            proxy.registerKeyBindings();
-
+    _lastState = newState
+    if (_cooldown < Reference.DRAW_SCREEN_EVENT_COOLDOWN) {
+      _cooldown += 1
     }
-
-    @Mod.EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
-        if(proxy != null)
-            proxy.performStartupChecks();
-    }
-
+  }
 }

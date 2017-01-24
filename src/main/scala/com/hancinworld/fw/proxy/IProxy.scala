@@ -1,4 +1,4 @@
-//Copyright (c) 2015, David Larochelle-Pratte
+//Copyright (c) 2015-2017, David Larochelle-Pratte
 //All rights reserved.
 //
 //        Redistribution and use in source and binary forms, with or without
@@ -20,48 +20,18 @@
 //        ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //        (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-package com.hancinworld.fw.utility;
+package com.hancinworld.fw.proxy
 
-import com.hancinworld.fw.reference.Reference;
-import net.minecraftforge.fml.common.FMLLog;
+trait IProxy {
+  def toggleFullScreen
 
-import org.apache.logging.log4j.Level;
+  def performStartupChecks
 
-public class LogHelper {
+  def registerKeyBindings
 
-    public static void log(Level logLevel, Object object) {
-        FMLLog.log(Reference.MOD_NAME, logLevel, String.valueOf(object));
-    }
+  def subscribeEvents(configurationFile: java.io.File)
 
-    public static void all(Object object) {
-        log(Level.ALL, object);
-    }
+  def isCorrectKeyPressed: Boolean
 
-    public static void debug(Object object) {
-        log(Level.DEBUG, object);
-    }
-
-    public static void error(Object object) {
-        log(Level.ERROR, object);
-    }
-
-    public static void fatal(Object object) {
-        log(Level.FATAL, object);
-    }
-
-    public static void info(Object object) {
-        log(Level.INFO, object);
-    }
-
-    public static void off(Object object) {
-        log(Level.OFF, object);
-    }
-
-    public static void trace(Object object) {
-        log(Level.TRACE, object);
-    }
-
-    public static void warn(Object object) {
-        log(Level.WARN, object);
-    }
+  def handleInitialFullscreen
 }

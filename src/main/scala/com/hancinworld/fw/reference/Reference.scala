@@ -1,4 +1,4 @@
-//Copyright (c) 2015, David Larochelle-Pratte
+//Copyright (c) 2015-2017, David Larochelle-Pratte
 //All rights reserved.
 //
 //        Redistribution and use in source and binary forms, with or without
@@ -20,7 +20,20 @@
 //        ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //        (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-package com.hancinworld.fw.proxy;
+package com.hancinworld.fw.reference
 
-public abstract class CommonProxy implements IProxy {
+object Reference {
+  final val CLIENT_PROXY_CLASS = "com.hancinworld.fw.proxy.ClientProxy"
+  final val GUI_FACTORY_CLASS = "com.hancinworld.fw.client.gui.GuiFactory"
+  final val MC_VERSIONS = "[1.8,)"
+  final val AUTOMATIC_MONITOR_SELECTION = 0
+  final val ONLY_REMOVE_DECORATIONS = false
+  final val ADVANCED_FEATURES_ENABLED = false
+  final val CUSTOM_FULLSCREEN_DIMENSIONS = false
+  final val ENABLE_MAXIMUM_COMPATIBILITY = true
+  final val CUSTOM_FULLSCREEN_X = 0
+  final val CUSTOM_FULLSCREEN_Y = 0
+  final val CUSTOM_FULLSCREEN_W = 0
+  final val CUSTOM_FULLSCREEN_H = 0
+  final val DRAW_SCREEN_EVENT_COOLDOWN = 40
 }

@@ -1,4 +1,4 @@
-//Copyright (c) 2015, David Larochelle-Pratte
+//Copyright (c) 2015-2017, David Larochelle-Pratte
 //All rights reserved.
 //
 //        Redistribution and use in source and binary forms, with or without
@@ -20,29 +20,20 @@
 //        ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //        (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-package com.hancinworld.fw.handler;
+package com.hancinworld.fw.client.gui
 
-import com.hancinworld.fw.FullscreenWindowed;
-import com.hancinworld.fw.proxy.ClientProxy;
-import com.hancinworld.fw.reference.Reference;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
+import com.hancinworld.fw.FullscreenWindowed
+import com.hancinworld.fw.handler.ConfigurationHandler
+import net.minecraft.client.gui.GuiScreen
+import net.minecraftforge.common.config.ConfigElement
+import net.minecraftforge.fml.client.config.GuiConfig
 
-public class KeyInputEventHandler {
+class ModGuiConfig(parentScreen: GuiScreen)
+  extends GuiConfig(parentScreen,
+    new ConfigElement(ConfigurationHandler.configurationCategory).getChildElements,
+    FullscreenWindowed.ID,
+    false,
+    false,
+    GuiConfig.getAbridgedConfigPath(ConfigurationHandler.toString)) {
 
-    private static boolean isCorrectKeyBinding()
-    {
-        return ClientProxy.fullscreenKeyBinding != null && ClientProxy.fullscreenKeyBinding.isPressed();
-    }
-
-    @SubscribeEvent
-    public void handleKeyInputEvent(InputEvent.KeyInputEvent event)
-    {
-
-        if(isCorrectKeyBinding())
-        {
-
-            FullscreenWindowed.proxy.toggleFullScreen(!ClientProxy.currentState, ConfigurationHandler.instance().getFullscreenMonitor());
-        }
-    }
 }

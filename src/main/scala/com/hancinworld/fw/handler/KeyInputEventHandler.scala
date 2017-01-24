@@ -1,4 +1,4 @@
-//Copyright (c) 2015, David Larochelle-Pratte
+//Copyright (c) 2015-2017, David Larochelle-Pratte
 //All rights reserved.
 //
 //        Redistribution and use in source and binary forms, with or without
@@ -20,25 +20,16 @@
 //        ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //        (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-package com.hancinworld.fw.reference;
+package com.hancinworld.fw.handler
 
-public class Reference {
+import com.hancinworld.fw.FullscreenWindowed
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.InputEvent
 
-    public static final String MOD_ID = "fw";
-    public static final String MOD_NAME = "Fullscreen Windowed";
-    public static final String CLIENT_PROXY_CLASS = "com.hancinworld.fw.proxy.ClientProxy";
-    public static final String VERSION = "1.4.0";
-    public static final String GUI_FACTORY_CLASS = "com.hancinworld.fw.client.gui.GuiFactory";
-    public static final String MC_VERSIONS = "[1.8,1.8+)";
-    public static final int AUTOMATIC_MONITOR_SELECTION = 0;
-    public static final boolean ONLY_REMOVE_DECORATIONS = false;
-    public static final boolean ADVANCED_FEATURES_ENABLED = false;
-    public static final boolean CUSTOM_FULLSCREEN_DIMENSIONS = false;
-    public static final boolean ENABLE_MAXIMUM_COMPATIBILITY = true;
-    public static final int CUSTOM_FULLSCREEN_X = 0;
-    public static final int CUSTOM_FULLSCREEN_Y = 0;
-    public static final int CUSTOM_FULLSCREEN_W = 0;
-    public static final int CUSTOM_FULLSCREEN_H = 0;
-    public static final int DRAW_SCREEN_EVENT_COOLDOWN = 40;
-
+class KeyInputEventHandler {
+  @SubscribeEvent
+  def handleKeyInputEvent(event: InputEvent.KeyInputEvent) {
+    if (FullscreenWindowed.proxy.isCorrectKeyPressed)
+      FullscreenWindowed.proxy.toggleFullScreen
+  }
 }

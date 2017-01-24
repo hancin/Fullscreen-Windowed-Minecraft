@@ -1,4 +1,4 @@
-//Copyright (c) 2015, David Larochelle-Pratte
+//Copyright (c) 2015-2017, David Larochelle-Pratte
 //All rights reserved.
 //
 //        Redistribution and use in source and binary forms, with or without
@@ -20,17 +20,41 @@
 //        ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 //        (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-package com.hancinworld.fw.proxy;
+package com.hancinworld.fw
 
+import com.hancinworld.fw.proxy.IProxy
+import com.hancinworld.fw.reference.Reference
+import net.minecraftforge.fml.common.Mod.EventHandler
+import net.minecraftforge.fml.common.{Mod, SidedProxy}
+import net.minecraftforge.fml.common.event._
+import org.apache.logging.log4j.{LogManager, Logger}
 
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+@Mod(modid = FullscreenWindowed.ID, name = FullscreenWindowed.Name,
+  clientSideOnly = true, version = FullscreenWindowed.Version,
+  guiFactory = Reference.GUI_FACTORY_CLASS, acceptedMinecraftVersions = Reference.MC_VERSIONS,
+  modLanguage = "scala")
+object FullscreenWindowed {
+  final val ID = "fw"
+  final val Name = "FullscreenWindowed"
+  final val Version = "@VERSION@"
 
-import java.io.File;
+  def log = logger.getOrElse(LogManager.getLogger(Name))
 
-public interface IProxy {
+  var logger: Option[Logger] = None
 
-    public void toggleFullScreen(boolean state, int desiredMonitor);
-    public void performStartupChecks();
-    public void registerKeyBindings();
-    public void subscribeEvents(File configurationFile);
+  @SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS)
+  var proxy: IProxy = null
+
+  @EventHandler
+  def preInit(event: FMLPreInitializationEvent) {
+    logger = Option(event.getModLog)
+    proxy.subscribeEvents(event.getSuggestedConfigurationFile)
+  }
+
+  @EventHandler
+  def init(event: FMLInitializationEvent) = FullscreenWindowed.proxy.registerKeyBindings
+
+  @EventHandler
+  def postInit(event: FMLPostInitializationEvent) = FullscreenWindowed.proxy.performStartupChecks
+
 }
