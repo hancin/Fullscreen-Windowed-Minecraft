@@ -13,4 +13,4 @@ script: gradle build
 
 cache:
   directories:
-- $HOME/.gradle/caches
+  - $HOME/.gradle/caches
