@@ -85,9 +85,19 @@ public class ConfigurationHandler {
     @SubscribeEvent
     public void onConfigurationChangedEvent(ConfigChangedEvent.OnConfigChangedEvent event)
     {
-        if(event.getModID().equalsIgnoreCase(Reference.MOD_ID)) {
+        try {
+            if (event.getModID().equalsIgnoreCase(Reference.MOD_ID)) {
+                load();
+                if (!_isInitializing) {
+                    FullscreenWindowed.proxy.registerKeyBindings();
+                }
+            }
+        } catch (java.lang.NoSuchMethodError e) {
+            // In earlier versions of Forge (1.8), event.getModID() does not exist.
+            // While this means any config change in any 1.8 mod configuration will force a reload of our configuration,
+            // this is probably better than crashing...
             load();
-            if(!_isInitializing){
+            if (!_isInitializing) {
                 FullscreenWindowed.proxy.registerKeyBindings();
             }
         }
