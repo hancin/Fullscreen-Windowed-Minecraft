@@ -39,15 +39,12 @@ class DrawScreenEventHandler {
   def handleDrawScreenEvent(event: GuiScreenEvent.DrawScreenEvent) {
     val newState = FullscreenWindowed.proxy.isCorrectKeyPressed
     if (_initialFullscreen && _cooldown >= Reference.DRAW_SCREEN_EVENT_COOLDOWN) {
-      FullscreenWindowed.log.info("Initial tick fullscreen")
       _cooldown = 0
       _initialFullscreen = false
       FullscreenWindowed.proxy.handleInitialFullscreen
     }
-    FullscreenWindowed.log.info(_lastState)
-    FullscreenWindowed.log.info(newState)
+
     if (!_initialFullscreen && _cooldown >= Reference.DRAW_SCREEN_EVENT_COOLDOWN && (_lastState != newState) && newState) {
-      FullscreenWindowed.log.info("State change")
       _cooldown = 0
       FullscreenWindowed.proxy.toggleFullScreen
     }

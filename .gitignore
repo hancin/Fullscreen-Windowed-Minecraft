@@ -13,7 +13,7 @@
 /*.ipr
 /*.iws
 /.idea
-/projectFilesBackup
+/projectFilesBackup*
 /out
 
 # Debugging
