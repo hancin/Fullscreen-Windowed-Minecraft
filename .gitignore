@@ -1,8 +1,27 @@
-out
-eclipse
-.gradle
-*.bin
-Fullscreen-Windowed-Minecraft.iws
-.gradle/2.0/taskArtifacts/taskArtifacts.bin
-build/
-Fullscreen-Windowed-Minecraftxxx.ipr
+# Gradle
+/.gradle
+/build
+
+# Eclipse
+/.classpath
+/.project
+/.settings
+/bin
+
+# IntelliJ IDEA
+/*.iml
+/*.ipr
+/*.iws
+/.idea
+/projectFilesBackup
+/out
+
+# Debugging
+/eclipse
+/run
+
+# Windows...
+**/Thumbs.db
+
+# OS X
+.DS_Store
