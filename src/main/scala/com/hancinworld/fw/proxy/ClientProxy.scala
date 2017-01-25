@@ -145,15 +145,17 @@ class ClientProxy extends IProxy {
     * @param desiredMonitor desired monitor or 0 for the current/default option.
     */
   def toggleFullScreen(goFullScreen: Boolean, desiredMonitor: Int): Unit = {
+    val mc = Minecraft.getMinecraft
     //If we're in actual fullscreen right now, then we need to fix that.
     if (Display.isFullscreen) {
-      ClientProxy.currentState = true
+      mc.toggleFullscreen
+      ClientProxy.currentState = false
       FullscreenWindowed.log.warn("Display is actual fullscreen! Is Minecraft starting with the option set?")
     }
 
     // if we have nothing to do (we appear to be in the correct mode) and we're not in actual fullscreen ( that's
     // never an acceptable state in this mod ), just quit now.
-    if (ClientProxy.currentState == goFullScreen && !Display.isFullscreen)
+    if (ClientProxy.currentState == goFullScreen)
       return
 
     //Save our current display parameters
@@ -172,13 +174,15 @@ class ClientProxy extends IProxy {
       newBounds = screenBounds
     try {
       Display.setDisplayMode(new DisplayMode(newBounds.getWidth.toInt, newBounds.getHeight.toInt))
-      Display.setResizable(!goFullScreen)
-      Display.setFullscreen(false)
-      Display.update()
       Display.setLocation(newBounds.x, newBounds.y)
-      Minecraft.getMinecraft.resize(newBounds.getWidth.toInt, newBounds.getHeight.toInt)
-    }
-    catch {
+      Display.setResizable(!goFullScreen)
+
+      mc.resize(newBounds.getWidth.toInt, newBounds.getHeight.toInt)
+      Display.setFullscreen(false)
+      Display.setVSyncEnabled(mc.gameSettings.enableVsync)
+      mc.updateDisplay
+
+    }catch {
       case e: LWJGLException => {
         e.printStackTrace()
       }
