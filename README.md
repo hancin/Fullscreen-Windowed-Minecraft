@@ -1,4 +1,4 @@
-# Fullscreen Windowed (Borderless) for Minecraft
+# Fullscreen Windowed (Borderless) for Minecraft [![Build Status](https://travis-ci.org/hancin/Fullscreen-Windowed-Minecraft.svg?branch=master)](https://travis-ci.org/hancin/Fullscreen-Windowed-Minecraft)
 
 This mod is a very simple addition to the game that will allow you to make your game run in **borderless windowed** instead of the default **fullscreen** available in Minecraft.  
 
