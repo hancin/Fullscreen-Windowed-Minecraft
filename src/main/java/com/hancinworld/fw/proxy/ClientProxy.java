@@ -132,18 +132,6 @@ public class ClientProxy extends CommonProxy {
         return screens[monitorID - 1].getDefaultConfiguration().getBounds();
     }
 
-    /** Calls the Minecraft resize() method so it updates its framebuffer. */
-    private void callMinecraftResizeMethod(int w, int h)
-    {
-        try{
-            Minecraft inst = Minecraft.getMinecraft();
-            inst.resize(w, h);
-
-        }catch (Exception e){
-            LogHelper.warn("Resize method not found or problem found while calling it. Are you using the correct version of the mod for this version of Minecraft?" + e.toString());
-        }
-    }
-
     private Rectangle getAppropriateScreenBounds(Rectangle currentCoordinates, int desiredMonitor)
     {
         Rectangle screenBounds;
@@ -186,15 +174,19 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void toggleFullScreen(boolean goFullScreen, int desiredMonitor) {
 
+        Minecraft mc = Minecraft.getMinecraft();
+
         //If we're in actual fullscreen right now, then we need to fix that.
         if(Display.isFullscreen()) {
-            currentState = true;
+            //Ask minecraft to do it so internal state is consistent.
+            mc.toggleFullscreen();
+            currentState = false;
             LogHelper.warn("Display is actual fullscreen! Is Minecraft starting with the option set?");
         }
 
         // if we have nothing to do (we appear to be in the correct mode) and we're not in actual fullscreen ( that's
         // never an acceptable state in this mod ), just quit now.
-        if(currentState == goFullScreen && !Display.isFullscreen())
+        if(currentState == goFullScreen)
             return;
 
         //Save our current display parameters
@@ -217,14 +209,13 @@ public class ClientProxy extends CommonProxy {
 
         try {
             Display.setDisplayMode(new DisplayMode((int) newBounds.getWidth(), (int) newBounds.getHeight()));
-            Display.setResizable(!goFullScreen);
-            Display.setFullscreen(false);
-
-            Display.update();
-
             Display.setLocation(newBounds.x, newBounds.y);
+            Display.setResizable(!goFullScreen);
 
-            callMinecraftResizeMethod((int)newBounds.getWidth(), (int)newBounds.getHeight());
+            mc.resize((int) newBounds.getWidth(), (int) newBounds.getHeight());
+            Display.setFullscreen(false);
+            Display.setVSyncEnabled(mc.gameSettings.enableVsync);
+            mc.updateDisplay();
 
         } catch (LWJGLException e) {
             e.printStackTrace();
