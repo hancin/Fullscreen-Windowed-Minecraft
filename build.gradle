@@ -1,13 +1,9 @@
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
         maven {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
         }
     }
     dependencies {
@@ -15,10 +11,12 @@ buildscript {
     }
 }
 
+apply plugin: 'scala'
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'idea'
 
-version = "1.10.2-1.4.0"
+ext.simpleVersion = "1.4.0"
+version = "1.10.2-${project.simpleVersion}"
 group= "com.hancinworld.fw" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "FullscreenWindowed"
 
@@ -26,6 +24,8 @@ minecraft {
     version = "1.10.2-12.18.3.2221"
     runDir = "eclipse"
     mappings = "stable_29"
+
+    replace "@VERSION@", project.simpleVersion
 }
 
 dependencies {
