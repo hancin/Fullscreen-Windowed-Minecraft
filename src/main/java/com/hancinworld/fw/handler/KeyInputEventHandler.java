@@ -24,7 +24,6 @@ package com.hancinworld.fw.handler;
 
 import com.hancinworld.fw.FullscreenWindowed;
 import com.hancinworld.fw.proxy.ClientProxy;
-import com.hancinworld.fw.reference.Reference;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
@@ -42,7 +41,7 @@ public class KeyInputEventHandler {
         if(isCorrectKeyBinding())
         {
 
-            FullscreenWindowed.proxy.toggleFullScreen(!ClientProxy.currentState, ConfigurationHandler.instance().getFullscreenMonitor());
+            FullscreenWindowed.proxy.toggleFullScreen(!ClientProxy.fullscreen, ConfigurationHandler.instance().getFullscreenMonitor());
         }
     }
 }

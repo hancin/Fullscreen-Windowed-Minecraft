@@ -22,7 +22,6 @@
 //        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.hancinworld.fw.proxy;
 
-import com.hancinworld.fw.FullscreenWindowed;
 import com.hancinworld.fw.handler.ConfigurationHandler;
 import com.hancinworld.fw.handler.DrawScreenEventHandler;
 import com.hancinworld.fw.handler.KeyInputEventHandler;
@@ -31,7 +30,6 @@ import com.hancinworld.fw.utility.LogHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.SplashProgress;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.LWJGLException;
@@ -41,15 +39,14 @@ import org.lwjgl.opengl.DisplayMode;
 
 import java.awt.*;
 import java.io.File;
-import java.lang.reflect.Method;
 
 public class ClientProxy extends CommonProxy {
 
+    private final Minecraft client = Minecraft.getMinecraft();
     private Rectangle _savedWindowedBounds;
-    public static boolean currentState;
+    public static boolean fullscreen;
     public static KeyBinding fullscreenKeyBinding;
     public DrawScreenEventHandler dsHandler;
-    private boolean _startupRequestedSetting;
 
     /** This keybind replaces the default MC fullscreen keybind in their logic handler. Without it, the game crashes.
      *  If this is set to any valid key, problems may occur. */
@@ -58,33 +55,26 @@ public class ClientProxy extends CommonProxy {
 
     public ClientProxy()
     {
-        Minecraft mc = Minecraft.getMinecraft();
-        _startupRequestedSetting = mc.gameSettings.fullScreen;
-        mc.gameSettings.fullScreen = false;
     }
 
     @Override
     public void registerKeyBindings()
     {
-
         /* FIXME: Overrides the minecraft hotkey for fullscreen, as there are no hooks */
         if(fullscreenKeyBinding == null && ConfigurationHandler.instance().isFullscreenWindowedEnabled())
         {
-            Minecraft mc = Minecraft.getMinecraft();
-            fullscreenKeyBinding = mc.gameSettings.keyBindFullscreen;
-            mc.gameSettings.keyBindFullscreen = ignoreKeyBinding;
+            fullscreenKeyBinding = client.gameSettings.keyBindFullscreen;
+            client.gameSettings.keyBindFullscreen = ignoreKeyBinding;
 
-            //Are we currently fullscreen? If yes this requires fixing.
-            _startupRequestedSetting = _startupRequestedSetting || Display.isFullscreen();
         }
         else if(fullscreenKeyBinding != null && !ConfigurationHandler.instance().isFullscreenWindowedEnabled())
         {
-
             Minecraft mc = Minecraft.getMinecraft();
             mc.gameSettings.keyBindFullscreen = fullscreenKeyBinding;
             fullscreenKeyBinding = null;
 
-            if(currentState){
+            if(fullscreen){
+                mc.fullscreen = false;
                 mc.toggleFullscreen();
             }
         }
@@ -170,32 +160,39 @@ public class ClientProxy extends CommonProxy {
 
         return screenBounds;
     }
+    @Override
+    public void toggleFullScreen(boolean goFullScreen) {
+        toggleFullScreen(goFullScreen, ConfigurationHandler.instance().getFullscreenMonitor());
+    }
 
     @Override
     public void toggleFullScreen(boolean goFullScreen, int desiredMonitor) {
 
-        Minecraft mc = Minecraft.getMinecraft();
+        //Set value if it isn't set already.
+        if(System.getProperty("org.lwjgl.opengl.Window.undecorated") == null){
+            System.setProperty("org.lwjgl.opengl.Window.undecorated", "false");
+        }
 
         //If we're in actual fullscreen right now, then we need to fix that.
         if(Display.isFullscreen()) {
-            //Ask minecraft to do it so internal state is consistent.
-            mc.toggleFullscreen();
-            currentState = false;
-            LogHelper.warn("Display is actual fullscreen! Is Minecraft starting with the option set?");
+            fullscreen = true;
         }
 
-        // if we have nothing to do (we appear to be in the correct mode) and we're not in actual fullscreen ( that's
-        // never an acceptable state in this mod ), just quit now.
-        if(currentState == goFullScreen)
+        String expectedState = goFullScreen ? "true":"false";
+        // If all state is valid, there is nothing to do and we just exit.
+        if(fullscreen == goFullScreen
+                && !Display.isFullscreen()//Display in fullscreen mode: Change required
+                && System.getProperty("org.lwjgl.opengl.Window.undecorated") == expectedState // Window not in expected state
+        )
             return;
 
         //Save our current display parameters
         Rectangle currentCoordinates = new Rectangle(Display.getX(), Display.getY(), Display.getWidth(), Display.getHeight());
-        if(goFullScreen)
+        if(goFullScreen && !Display.isFullscreen())
             _savedWindowedBounds = currentCoordinates;
 
         //Changing this property and causing a Display update will cause LWJGL to add/remove decorations (borderless).
-        System.setProperty("org.lwjgl.opengl.Window.undecorated", goFullScreen?"true":"false");
+        System.setProperty("org.lwjgl.opengl.Window.undecorated",expectedState);
 
         //Get the fullscreen dimensions for the appropriate screen.
         Rectangle screenBounds = getAppropriateScreenBounds(currentCoordinates, desiredMonitor);
@@ -205,23 +202,31 @@ public class ClientProxy extends CommonProxy {
         if(newBounds == null)
             newBounds = screenBounds;
 
-
+        if(goFullScreen == false && ClientProxy.fullscreen == false) {
+            newBounds = currentCoordinates;
+            _savedWindowedBounds = currentCoordinates;
+        }
 
         try {
+            fullscreen = goFullScreen;
+            client.fullscreen = fullscreen;
+            if( client.gameSettings.fullScreen != fullscreen) {
+                client.gameSettings.fullScreen = fullscreen;
+                client.gameSettings.saveOptions();
+            }
             Display.setDisplayMode(new DisplayMode((int) newBounds.getWidth(), (int) newBounds.getHeight()));
             Display.setLocation(newBounds.x, newBounds.y);
             Display.setResizable(!goFullScreen);
 
-            mc.resize((int) newBounds.getWidth(), (int) newBounds.getHeight());
+            client.resize((int) newBounds.getWidth(), (int) newBounds.getHeight());
             Display.setFullscreen(false);
-            Display.setVSyncEnabled(mc.gameSettings.enableVsync);
-            mc.updateDisplay();
+            Display.setVSyncEnabled(client.gameSettings.enableVsync);
+            client.updateDisplay();
 
         } catch (LWJGLException e) {
             e.printStackTrace();
         }
 
-        currentState = goFullScreen;
     }
 
     @Override
@@ -230,23 +235,22 @@ public class ClientProxy extends CommonProxy {
     {
         //If the mod is disabled by configuration, just put back the initial value.
         if(!ConfigurationHandler.instance().isFullscreenWindowedEnabled()) {
-            Minecraft.getMinecraft().gameSettings.fullScreen = _startupRequestedSetting;
             return;
         }
 
         if(ConfigurationHandler.instance().isMaximumCompatibilityEnabled()){
-            dsHandler.setInitialFullscreen(_startupRequestedSetting,  ConfigurationHandler.instance().getFullscreenMonitor());
+            dsHandler.setInitialFullscreen(client.gameSettings.fullScreen,  ConfigurationHandler.instance().getFullscreenMonitor());
         // This is the correct way to set fullscreen at launch, but LWJGL limitations means we might crash the game if
         // another mod tries to do a similar Display changing operation. Doesn't help the API says "don't use this"
         }else{
             try {
                 //FIXME: Living dangerously here... Is there a better way of doing this?
                 SplashProgress.pause();
-                toggleFullScreen(_startupRequestedSetting, ConfigurationHandler.instance().getFullscreenMonitor());
+                toggleFullScreen(client.gameSettings.fullScreen, ConfigurationHandler.instance().getFullscreenMonitor());
                 SplashProgress.resume();
             }catch(NoClassDefFoundError e) {
                 LogHelper.warn("Error while doing startup checks, are you using an old version of Forge ? " + e);
-                toggleFullScreen(_startupRequestedSetting, ConfigurationHandler.instance().getFullscreenMonitor());
+                toggleFullScreen(client.gameSettings.fullScreen, ConfigurationHandler.instance().getFullscreenMonitor());
             }
         }
     }

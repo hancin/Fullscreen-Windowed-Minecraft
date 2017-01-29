@@ -15,7 +15,7 @@ apply plugin: 'scala'
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'idea'
 
-ext.simpleVersion = "1.4.1"
+ext.simpleVersion = "1.5.0"
 version = "1.10.2-${project.simpleVersion}"
 group= "com.hancinworld.fw" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "FullscreenWindowed"
@@ -26,6 +26,12 @@ minecraft {
     mappings = "stable_29"
 
     replace "@VERSION@", project.simpleVersion
+}
+
+jar {
+    manifest {
+        attributes FMLAT: "fw_at.cfg"
+    }
 }
 
 dependencies {
@@ -57,9 +63,13 @@ processResources
         // replace version and mcversion
         expand 'version':project.simpleVersion, 'mcversion':project.minecraft.version
     }
+
         
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+
+    // Move access transformer to META-INF
+    rename '(.+_at.cfg)', 'META-INF/$1'
 }

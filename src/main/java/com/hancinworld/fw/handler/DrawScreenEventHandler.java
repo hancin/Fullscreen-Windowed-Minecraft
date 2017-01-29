@@ -25,8 +25,8 @@ package com.hancinworld.fw.handler;
 import com.hancinworld.fw.FullscreenWindowed;
 import com.hancinworld.fw.proxy.ClientProxy;
 import com.hancinworld.fw.reference.Reference;
-import com.hancinworld.fw.utility.LogHelper;
-import net.minecraftforge.common.config.Configuration;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiVideoSettings;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import org.lwjgl.input.Keyboard;
@@ -36,6 +36,7 @@ import org.lwjgl.input.Keyboard;
  */
 public class DrawScreenEventHandler {
 
+    private final Minecraft client = Minecraft.getMinecraft();
     private boolean _lastState = false;
     private boolean _initialFullscreen = false;
     private boolean _initialGoFullScreen = false;
@@ -58,6 +59,9 @@ public class DrawScreenEventHandler {
 
     @SubscribeEvent
     public void handleDrawScreenEvent(GuiScreenEvent.DrawScreenEvent event) {
+        if(!ConfigurationHandler.instance().isFullscreenWindowedEnabled())
+            return;
+
 
         boolean newState = isCorrectKeyBinding();
         if(_initialFullscreen && _cooldown >= Reference.DRAW_SCREEN_EVENT_COOLDOWN) {
@@ -69,12 +73,17 @@ public class DrawScreenEventHandler {
         {
             _cooldown = 0;
             _lastState = newState;
-            FullscreenWindowed.proxy.toggleFullScreen(!ClientProxy.currentState, ConfigurationHandler.instance().getFullscreenMonitor());
+            FullscreenWindowed.proxy.toggleFullScreen(!ClientProxy.fullscreen, ConfigurationHandler.instance().getFullscreenMonitor());
         }
 
         _lastState = newState;
 
         if(_cooldown < Reference.DRAW_SCREEN_EVENT_COOLDOWN)
             _cooldown++;
+
+
+        if(event.getGui() instanceof GuiVideoSettings && client.fullscreen != ClientProxy.fullscreen) {
+            FullscreenWindowed.proxy.toggleFullScreen(client.fullscreen);
+        }
     }
 }
