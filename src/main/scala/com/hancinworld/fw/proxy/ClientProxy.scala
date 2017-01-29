@@ -26,7 +26,7 @@ import java.awt._
 import java.io.File
 
 import com.hancinworld.fw.FullscreenWindowed
-import com.hancinworld.fw.handler.{ConfigurationHandler, DrawScreenEventHandler, KeyInputEventHandler}
+import com.hancinworld.fw.handler.{ConfigurationHandler, ScreenEventHandler, KeyInputEventHandler}
 import com.hancinworld.fw.reference.Reference
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
@@ -37,7 +37,7 @@ import org.lwjgl.input.Keyboard
 import org.lwjgl.opengl.{Display, DisplayMode}
 
 object ClientProxy {
-  var currentState: Boolean = false
+  var fullscreen: Boolean = false
   var fullscreenKeyBinding: KeyBinding = null
 
   /** This keybind replaces the default MC fullscreen keybind in their logic handler. Without it, the game crashes.
@@ -47,7 +47,6 @@ object ClientProxy {
 
 class ClientProxy extends IProxy {
   private val startupRequestedSetting = Minecraft.getMinecraft().gameSettings.fullScreen || Display.isFullscreen
-  Minecraft.getMinecraft().gameSettings.fullScreen = false
   private var savedWindowedBounds: Rectangle = null
 
   def isCorrectKeyPressed: Boolean = ClientProxy.fullscreenKeyBinding != null && (ClientProxy.fullscreenKeyBinding.isPressed || Keyboard.isKeyDown(ClientProxy.fullscreenKeyBinding.getKeyCode))
@@ -62,7 +61,7 @@ class ClientProxy extends IProxy {
       mc.gameSettings.keyBindFullscreen = ClientProxy.fullscreenKeyBinding
       ClientProxy.fullscreenKeyBinding = null
 
-      if (ClientProxy.currentState)
+      if (ClientProxy.fullscreen)
         mc.toggleFullscreen()
     }
   }
@@ -71,7 +70,7 @@ class ClientProxy extends IProxy {
     ConfigurationHandler.init(configurationFile)
     MinecraftForge.EVENT_BUS.register(ConfigurationHandler)
     MinecraftForge.EVENT_BUS.register(new KeyInputEventHandler())
-    MinecraftForge.EVENT_BUS.register(new DrawScreenEventHandler())
+    MinecraftForge.EVENT_BUS.register(new ScreenEventHandler())
   }
 
   /**
@@ -137,7 +136,9 @@ class ClientProxy extends IProxy {
 
   }
 
-  def toggleFullScreen = toggleFullScreen(!ClientProxy.currentState, ConfigurationHandler.fullscreenMonitor)
+  def toggleFullScreen = toggleFullScreen(!ClientProxy.fullscreen, ConfigurationHandler.fullscreenMonitor)
+  def toggleFullScreen(goFullScreen: Boolean) = toggleFullScreen(goFullScreen, ConfigurationHandler.fullscreenMonitor)
+
   /**
     * Toggle fullscreen to the desired state on the desired monitor
     *
@@ -146,16 +147,24 @@ class ClientProxy extends IProxy {
     */
   def toggleFullScreen(goFullScreen: Boolean, desiredMonitor: Int): Unit = {
     val mc = Minecraft.getMinecraft
+
+    // Initialize the property if it isn't set, to prevent unnecessary transition at startup
+    if(System.getProperty("org.lwjgl.opengl.Window.undecorated") == null){
+      System.setProperty("org.lwjgl.opengl.Window.undecorated", "false")
+    }
+
     //If we're in actual fullscreen right now, then we need to fix that.
     if (Display.isFullscreen) {
-      mc.toggleFullscreen
-      ClientProxy.currentState = false
+      ClientProxy.fullscreen = true
       FullscreenWindowed.log.warn("Display is actual fullscreen! Is Minecraft starting with the option set?")
     }
 
-    // if we have nothing to do (we appear to be in the correct mode) and we're not in actual fullscreen ( that's
-    // never an acceptable state in this mod ), just quit now.
-    if (ClientProxy.currentState == goFullScreen)
+    val expectedState = if (goFullScreen) "true" else "false"
+    // Skip operation if all state is valid
+    if (ClientProxy.fullscreen == goFullScreen
+      && !Display.isFullscreen //Display in fullscreen mode: Change required
+      && System.getProperty("org.lwjgl.opengl.Window.undecorated") == expectedState // Window not in expected state
+    )
       return
 
     //Save our current display parameters
@@ -165,14 +174,25 @@ class ClientProxy extends IProxy {
       savedWindowedBounds = currentCoordinates
 
     //Changing this property and causing a Display update will cause LWJGL to add/remove decorations (borderless).
-    System.setProperty("org.lwjgl.opengl.Window.undecorated", if (goFullScreen) "true" else "false")
+    System.setProperty("org.lwjgl.opengl.Window.undecorated", expectedState)
     //Get the fullscreen dimensions for the appropriate screen.
     val screenBounds = getAppropriateScreenBounds(currentCoordinates, desiredMonitor)
     //This is the new bounds we have to apply.
     var newBounds = if (goFullScreen) screenBounds else savedWindowedBounds
     if (newBounds == null)
       newBounds = screenBounds
+
+    if(goFullScreen == false && ClientProxy.fullscreen == false) {
+      newBounds = currentCoordinates
+    }
+
     try {
+      ClientProxy.fullscreen = goFullScreen
+      mc.fullscreen = ClientProxy.fullscreen
+      if(mc.gameSettings.fullScreen != ClientProxy.fullscreen) {
+        mc.gameSettings.fullScreen = ClientProxy.fullscreen
+        mc.gameSettings.saveOptions()
+      }
       Display.setDisplayMode(new DisplayMode(newBounds.getWidth.toInt, newBounds.getHeight.toInt))
       Display.setLocation(newBounds.x, newBounds.y)
       Display.setResizable(!goFullScreen)
@@ -181,14 +201,12 @@ class ClientProxy extends IProxy {
       Display.setFullscreen(false)
       Display.setVSyncEnabled(mc.gameSettings.enableVsync)
       mc.updateDisplay
-
     }catch {
       case e: LWJGLException => {
         e.printStackTrace()
       }
     }
 
-    ClientProxy.currentState = goFullScreen
   }
 
   /**

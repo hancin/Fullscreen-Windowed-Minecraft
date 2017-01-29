@@ -23,20 +23,27 @@
 package com.hancinworld.fw.handler
 
 import com.hancinworld.fw.FullscreenWindowed
+import com.hancinworld.fw.proxy.ClientProxy
 import com.hancinworld.fw.reference.Reference
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiVideoSettings
 import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 /**
   * We need to register for this event because we want fullscreen to be global.
   */
-class DrawScreenEventHandler {
+class ScreenEventHandler {
+  private val client = Minecraft.getMinecraft
   private var _lastState = false
   private var _initialFullscreen = true
   private var _cooldown = Reference.DRAW_SCREEN_EVENT_COOLDOWN - 5
 
   @SubscribeEvent
   def handleDrawScreenEvent(event: GuiScreenEvent.DrawScreenEvent) {
+    if(!ConfigurationHandler.fullscreenWindowedEnabled)
+      return
+
     val newState = FullscreenWindowed.proxy.isCorrectKeyPressed
     if (_initialFullscreen && _cooldown >= Reference.DRAW_SCREEN_EVENT_COOLDOWN) {
       _cooldown = 0
@@ -53,5 +60,11 @@ class DrawScreenEventHandler {
     if (_cooldown < Reference.DRAW_SCREEN_EVENT_COOLDOWN) {
       _cooldown += 1
     }
+
+    //Delayed response to Fullscreen option.
+    if(event.getGui.isInstanceOf[GuiVideoSettings] && client.fullscreen != ClientProxy.fullscreen){
+      FullscreenWindowed.proxy.toggleFullScreen(client.fullscreen)
+    }
+
   }
 }

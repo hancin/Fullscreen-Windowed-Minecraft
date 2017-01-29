@@ -25,6 +25,8 @@ package com.hancinworld.fw.proxy
 trait IProxy {
   def toggleFullScreen
 
+  def toggleFullScreen(goFullScreen: Boolean)
+
   def performStartupChecks
 
   def registerKeyBindings
