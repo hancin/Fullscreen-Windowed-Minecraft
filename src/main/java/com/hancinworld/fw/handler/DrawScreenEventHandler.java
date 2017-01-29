@@ -25,6 +25,7 @@ package com.hancinworld.fw.handler;
 import com.hancinworld.fw.FullscreenWindowed;
 import com.hancinworld.fw.proxy.ClientProxy;
 import com.hancinworld.fw.reference.Reference;
+import com.hancinworld.fw.utility.LogHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiVideoSettings;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -81,9 +82,15 @@ public class DrawScreenEventHandler {
         if(_cooldown < Reference.DRAW_SCREEN_EVENT_COOLDOWN)
             _cooldown++;
 
-
-        if(event.getGui() instanceof GuiVideoSettings && client.fullscreen != ClientProxy.fullscreen) {
-            FullscreenWindowed.proxy.toggleFullScreen(client.fullscreen);
+        if(client.getVersion().startsWith("forge-11")){
+            //Do it the old way in 1.8 since event.getGui does not exist.
+            if(client.currentScreen instanceof GuiVideoSettings && client.fullscreen != ClientProxy.fullscreen) {
+                FullscreenWindowed.proxy.toggleFullScreen(client.fullscreen);
+            }
+        }else{
+            if (event.getGui() instanceof GuiVideoSettings && client.fullscreen != ClientProxy.fullscreen) {
+                FullscreenWindowed.proxy.toggleFullScreen(client.fullscreen);
+            }
         }
     }
 }

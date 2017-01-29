@@ -214,12 +214,12 @@ public class ClientProxy extends CommonProxy {
                 client.gameSettings.fullScreen = fullscreen;
                 client.gameSettings.saveOptions();
             }
+            Display.setFullscreen(false);
+            Display.setResizable(!goFullScreen);
             Display.setDisplayMode(new DisplayMode((int) newBounds.getWidth(), (int) newBounds.getHeight()));
             Display.setLocation(newBounds.x, newBounds.y);
-            Display.setResizable(!goFullScreen);
 
             client.resize((int) newBounds.getWidth(), (int) newBounds.getHeight());
-            Display.setFullscreen(false);
             Display.setVSyncEnabled(client.gameSettings.enableVsync);
             client.updateDisplay();
 
