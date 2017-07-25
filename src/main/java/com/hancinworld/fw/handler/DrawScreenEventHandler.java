@@ -88,8 +88,17 @@ public class DrawScreenEventHandler {
                 FullscreenWindowed.proxy.toggleFullScreen(client.fullscreen);
             }
         }else{
-            if (event.getGui() instanceof GuiVideoSettings && client.fullscreen != ClientProxy.fullscreen) {
-                FullscreenWindowed.proxy.toggleFullScreen(client.fullscreen);
+            try {
+                if (event.getGui() instanceof GuiVideoSettings && client.fullscreen != ClientProxy.fullscreen) {
+                    FullscreenWindowed.proxy.toggleFullScreen(client.fullscreen);
+                }
+            // In certain scenarios of 1.8, client mods further change the version and the previous check fails.
+            // In those scenarios, we'll get this error and we will fallback to the old method.
+            } catch (NoSuchMethodError error) {
+                //Do it the old way in 1.8 since event.getGui does not exist.
+                if(client.currentScreen instanceof GuiVideoSettings && client.fullscreen != ClientProxy.fullscreen) {
+                    FullscreenWindowed.proxy.toggleFullScreen(client.fullscreen);
+                }
             }
         }
     }
