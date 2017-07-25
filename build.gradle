@@ -1,29 +1,28 @@
 buildscript {
     repositories {
         jcenter()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
+        maven { url = "http://files.minecraftforge.net/maven" }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
-
-apply plugin: 'scala'
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'idea'
 
-ext.simpleVersion = "1.5.0"
-version = "1.10.2-${project.simpleVersion}"
-group= "com.hancinworld.fw" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+ext.simpleVersion = "1.6.0"
+version = "1.12-${project.simpleVersion}"
+group= "com.hancinworld.fw" 
 archivesBaseName = "FullscreenWindowed"
+sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
 
 minecraft {
-    version = "1.10.2-12.18.3.2221"
-    runDir = "eclipse"
-    mappings = "stable_29"
+    version = "1.12-14.21.1.2424"
+    runDir = "run"
+    mappings = "snapshot_20170712"
 
     replace "@VERSION@", project.simpleVersion
 }
