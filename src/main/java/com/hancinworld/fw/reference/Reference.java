@@ -29,7 +29,7 @@ public class Reference {
     public static final String CLIENT_PROXY_CLASS = "com.hancinworld.fw.proxy.ClientProxy";
     public static final String VERSION = "@VERSION@";
     public static final String GUI_FACTORY_CLASS = "com.hancinworld.fw.client.gui.GuiFactory";
-    public static final String MC_VERSIONS = "[1.8,)";
+    public static final String MC_VERSIONS = "[1.12,)";
     public static final int AUTOMATIC_MONITOR_SELECTION = 0;
     public static final boolean ONLY_REMOVE_DECORATIONS = false;
     public static final boolean ADVANCED_FEATURES_ENABLED = false;
