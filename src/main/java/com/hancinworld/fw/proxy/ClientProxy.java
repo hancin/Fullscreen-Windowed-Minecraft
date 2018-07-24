@@ -223,6 +223,11 @@ public class ClientProxy extends CommonProxy {
             Display.setVSyncEnabled(client.gameSettings.enableVsync);
             client.updateDisplay();
 
+            // Related to the Forge fix for MC-68754
+            if (!goFullScreen) {
+            	Display.setResizable(false);
+            	Display.setResizable(true);
+            }
         } catch (LWJGLException e) {
             e.printStackTrace();
         }
