@@ -215,19 +215,18 @@ public class ClientProxy extends CommonProxy {
                 client.gameSettings.saveOptions();
             }
             Display.setFullscreen(false);
-            Display.setResizable(!goFullScreen);
             Display.setDisplayMode(new DisplayMode((int) newBounds.getWidth(), (int) newBounds.getHeight()));
             Display.setLocation(newBounds.x, newBounds.y);
 
             client.resize((int) newBounds.getWidth(), (int) newBounds.getHeight());
-            Display.setVSyncEnabled(client.gameSettings.enableVsync);
-            client.updateDisplay();
-
             // Related to the Forge fix for MC-68754
             if (!goFullScreen) {
             	Display.setResizable(false);
-            	Display.setResizable(true);
             }
+            Display.setResizable(!goFullScreen);
+            Display.setVSyncEnabled(client.gameSettings.enableVsync);
+            client.updateDisplay();
+            
         } catch (LWJGLException e) {
             e.printStackTrace();
         }
